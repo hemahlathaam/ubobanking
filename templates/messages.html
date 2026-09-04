@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}
+Messages | MiniBank
+{% endblock %}
+
+{% block content %}
+
+<div class="page-heading">
+    <div>
+        <p class="page-label">
+            PRIVATE MESSAGING
+        </p>
+
+        <h1>Messages</h1>
+
+        <p>
+            Message another MiniBank demo account.
+        </p>
+    </div>
+</div>
+
+<section class="professional-panel">
+
+    <div class="panel-header">
+        <div>
+            <h2>Accounts</h2>
+
+            <p>
+                Select a person to start messaging.
+            </p>
+        </div>
+    </div>
+
+    {% if users %}
+
+    <div class="message-user-list">
+
+        {% for user in users %}
+
+        <a
+            href="{{ url_for('chat', user_id=user.id) }}"
+            class="message-user"
+        >
+
+            <div class="message-avatar">
+                {{ user.display_name[0]|upper }}
+            </div>
+
+            <div class="message-user-info">
+
+                <strong>
+                    {{ user.display_name }}
+                </strong>
+
+                <span>
+                    @{{ user.username }}
+                </span>
+
+            </div>
+
+            <div class="message-arrow">
+                →
+            </div>
+
+        </a>
+
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+
+    <div class="professional-empty">
+
+        <div class="empty-icon">
+            ✉
+        </div>
+
+        <h3>No accounts available</h3>
+
+        <p>
+            There are no other enabled accounts.
+        </p>
+
+    </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

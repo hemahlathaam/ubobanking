@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}
+Dashboard | MiniBank
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-heading">
+
+    <div>
+        <p class="page-label">
+            OVERVIEW
+        </p>
+
+        <h1>
+            Good to see you, {{ current_user.display_name }}
+        </h1>
+
+        <p>
+            Here's an overview of your demo account.
+        </p>
+    </div>
+
+</div>
+
+
+<section class="account-balance-card">
+
+    <div class="balance-card-top">
+
+        <div>
+            <span class="balance-label">
+                AVAILABLE BALANCE
+            </span>
+
+            <h2>
+                {{ current_user.balance|money }}
+            </h2>
+        </div>
+
+        <div class="account-status">
+            ACTIVE
+        </div>
+
+    </div>
+
+
+    <div class="balance-card-bottom">
+
+        <div>
+            <span>ACCOUNT HOLDER</span>
+
+            <strong>
+                {{ current_user.display_name }}
+            </strong>
+        </div>
+
+        <div>
+            <span>USERNAME</span>
+
+            <strong>
+                @{{ current_user.username }}
+            </strong>
+        </div>
+
+        <div>
+            <span>ACCOUNT TYPE</span>
+
+            <strong>
+                Demo Account
+            </strong>
+        </div>
+
+    </div>
+
+</section>
+
+
+<section class="dashboard-grid">
+
+    <a
+        href="{{ url_for('transfer') }}"
+        class="professional-action-card"
+    >
+
+        <div class="professional-action-icon">
+            ↗
+        </div>
+
+        <div>
+            <h3>Transfer funds</h3>
+
+            <p>
+                Send demo money to another account.
+            </p>
+        </div>
+
+        <span class="action-arrow">
+            →
+        </span>
+
+    </a>
+
+
+    <a
+        href="{{ url_for('transactions') }}"
+        class="professional-action-card"
+    >
+
+        <div class="professional-action-icon">
+            ☷
+        </div>
+
+        <div>
+            <h3>Transaction history</h3>
+
+            <p>
+                Review sent and received transactions.
+            </p>
+        </div>
+
+        <span class="action-arrow">
+            →
+        </span>
+
+    </a>
+
+</section>
+
+
+<section class="professional-panel">
+
+    <div class="panel-header">
+
+        <div>
+            <h2>
+                Recent transactions
+            </h2>
+
+            <p>
+                Your latest account activity.
+            </p>
+        </div>
+
+        <a href="{{ url_for('transactions') }}">
+            View all
+        </a>
+
+    </div>
+
+
+    {% if transactions %}
+
+        <div class="transaction-list">
+
+            {% for transaction in transactions %}
+
+            <div class="professional-transaction">
+
+                <div class="transaction-main">
+
+                    <div class="
+                        transaction-direction
+                        {% if transaction.sender_id == current_user.id %}
+                            sent-icon
+                        {% else %}
+                            received-icon
+                        {% endif %}
+                    ">
+
+                        {% if transaction.sender_id == current_user.id %}
+                            ↗
+                        {% else %}
+                            ↙
+                        {% endif %}
+
+                    </div>
+
+
+                    <div>
+
+                        {% if transaction.sender_id == current_user.id %}
+
+                            <strong>
+                                Transfer to
+                                {{ transaction.receiver.display_name }}
+                            </strong>
+
+                            <p>
+                                @{{ transaction.receiver.username }}
+                            </p>
+
+                        {% else %}
+
+                            <strong>
+                                Transfer from
+                                {{ transaction.sender.display_name }}
+                            </strong>
+
+                            <p>
+                                @{{ transaction.sender.username }}
+                            </p>
+
+                        {% endif %}
+
+
+                        {% if transaction.note %}
+
+                        <small>
+                            {{ transaction.note }}
+                        </small>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <div class="
+                    transaction-amount
+                    {% if transaction.sender_id == current_user.id %}
+                        amount-sent
+                    {% else %}
+                        amount-received
+                    {% endif %}
+                ">
+
+                    {% if transaction.sender_id == current_user.id %}
+                        -{{ transaction.amount|money }}
+                    {% else %}
+                        +{{ transaction.amount|money }}
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+
+    {% else %}
+
+        <div class="professional-empty">
+
+            <div class="empty-icon">
+                ☷
+            </div>
+
+            <h3>No transactions yet</h3>
+
+            <p>
+                Your account activity will appear here.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

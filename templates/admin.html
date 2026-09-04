@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="card">
+    <h1>Admin panel</h1>
+
+    <form action="{{ url_for('create_user') }}" method="post">
+
+        <label>Display name</label>
+        <input name="display_name" required>
+
+        <label>Username</label>
+        <input name="username" required>
+
+        <label>Password</label>
+        <input name="password" type="password" minlength="8" required>
+
+        <label>Starting balance</label>
+        <input
+            name="balance"
+            type="number"
+            min="0"
+            step="0.01"
+            value="1000.00"
+            required
+        >
+
+        <label>
+            <input
+                type="checkbox"
+                name="is_admin"
+                style="width:auto"
+            >
+            Make administrator
+        </label>
+
+        <button class="button" type="submit">
+            Create account
+        </button>
+
+    </form>
+</section>
+
+
+<section class="card">
+
+    <h2>Accounts</h2>
+
+    {% for u in users %}
+
+    <div class="row">
+
+        <div>
+            <strong>
+                {{ u.display_name }} (@{{ u.username }})
+            </strong>
+
+            <p>
+                {{ u.balance|money }}
+
+                {% if u.is_enabled %}
+                    · Enabled
+                {% else %}
+                    · Disabled
+                {% endif %}
+            </p>
+        </div>
+
+
+        <div class="admin-user-actions">
+
+            <form
+                action="{{ url_for('set_balance', user_id=u.id) }}"
+                method="post"
+            >
+                <input
+                    name="balance"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value="{{ '%.2f'|format(u.balance) }}"
+                    required
+                >
+
+                <button type="submit">
+                    Set balance
+                </button>
+            </form>
+
+
+            <form
+                action="{{ url_for('reset_password', user_id=u.id) }}"
+                method="post"
+            >
+                <input
+                    name="new_password"
+                    type="password"
+                    minlength="8"
+                    placeholder="New password"
+                    required
+                >
+
+                <button type="submit">
+                    Reset password
+                </button>
+            </form>
+
+
+            {% if u.id != current_user.id %}
+
+            <form
+                action="{{ url_for('toggle_user', user_id=u.id) }}"
+                method="post"
+            >
+                <button type="submit">
+
+                    {% if u.is_enabled %}
+                        Disable account
+                    {% else %}
+                        Enable account
+                    {% endif %}
+
+                </button>
+            </form>
+
+
+            <form
+                action="{{ url_for('delete_user', user_id=u.id) }}"
+                method="post"
+                onsubmit="return confirm('Are you sure you want to delete this account?');"
+            >
+                <button
+                    type="submit"
+                    class="danger-button"
+                >
+                    Delete account
+                </button>
+            </form>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+</section>
+
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}
+Chat with {{ other_user.display_name }} | MiniBank
+{% endblock %}
+
+{% block content %}
+
+<div class="page-heading">
+
+    <div>
+        <p class="page-label">
+            PRIVATE MESSAGE
+        </p>
+
+        <h1>
+            {{ other_user.display_name }}
+        </h1>
+
+        <p>
+            @{{ other_user.username }}
+        </p>
+    </div>
+
+</div>
+
+<section class="professional-panel chat-panel">
+
+    <div class="chat-header">
+
+        <div class="message-avatar">
+            {{ other_user.display_name[0]|upper }}
+        </div>
+
+        <div>
+            <strong>
+                {{ other_user.display_name }}
+            </strong>
+
+            <span>
+                @{{ other_user.username }}
+            </span>
+        </div>
+
+    </div>
+
+    <div class="chat-messages">
+
+        {% if conversation %}
+
+            {% for message in conversation %}
+
+            <div class="
+                chat-message-row
+                {% if message.sender_id == current_user.id %}
+                    my-message-row
+                {% else %}
+                    other-message-row
+                {% endif %}
+            ">
+
+                <div class="
+                    chat-bubble
+                    {% if message.sender_id == current_user.id %}
+                        my-message
+                    {% else %}
+                        other-message
+                    {% endif %}
+                ">
+
+                    <p>
+                        {{ message.content }}
+                    </p>
+
+                    <span>
+                        {{ message.created_at.strftime('%d %b · %H:%M') }}
+                    </span>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="chat-empty">
+
+                <h3>No messages yet</h3>
+
+                <p>
+                    Send the first message.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+    <form
+        method="post"
+        class="chat-form"
+    >
+
+        <textarea
+            name="content"
+            maxlength="1000"
+            placeholder="Write a message..."
+            rows="2"
+            required
+        ></textarea>
+
+        <button
+            type="submit"
+            class="chat-send-button"
+        >
+            Send
+        </button>
+
+    </form>
+
+</section>
+
+{% endblock %}

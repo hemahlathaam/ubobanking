@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}
+Transactions | MiniBank
+{% endblock %}
+
+{% block content %}
+
+<div class="page-heading">
+
+    <div>
+        <p class="page-label">
+            ACCOUNT ACTIVITY
+        </p>
+
+        <h1>
+            Transaction history
+        </h1>
+
+        <p>
+            Search and review your demo account activity.
+        </p>
+    </div>
+
+</div>
+
+
+<section class="professional-panel search-panel">
+
+    <form
+        method="get"
+        action="{{ url_for('transactions') }}"
+        class="transaction-search-form"
+    >
+
+        <div class="transaction-search-box">
+
+            <span>⌕</span>
+
+            <input
+                name="search"
+                value="{{ search }}"
+                placeholder="Search name, username or note"
+            >
+
+        </div>
+
+
+        <input
+            type="hidden"
+            name="type"
+            value="{{ transaction_type }}"
+        >
+
+
+        <button
+            type="submit"
+            class="search-button"
+        >
+            Search
+        </button>
+
+
+        {% if search %}
+
+        <a
+            href="{{ url_for('transactions', type=transaction_type) }}"
+            class="clear-search-button"
+        >
+            Clear
+        </a>
+
+        {% endif %}
+
+    </form>
+
+
+    <div class="transaction-filters">
+
+        <a
+            href="{{ url_for('transactions', search=search, type='all') }}"
+            class="{% if transaction_type == 'all' %}active-filter{% endif %}"
+        >
+            All
+        </a>
+
+
+        <a
+            href="{{ url_for('transactions', search=search, type='sent') }}"
+            class="{% if transaction_type == 'sent' %}active-filter{% endif %}"
+        >
+            Sent
+        </a>
+
+
+        <a
+            href="{{ url_for('transactions', search=search, type='received') }}"
+            class="{% if transaction_type == 'received' %}active-filter{% endif %}"
+        >
+            Received
+        </a>
+
+    </div>
+
+</section>
+
+
+<section class="professional-panel">
+
+    <div class="panel-header">
+
+        <div>
+            <h2>Transactions</h2>
+
+            <p>
+                {{ transactions|length }}
+                transaction{% if transactions|length != 1 %}s{% endif %} found.
+            </p>
+        </div>
+
+    </div>
+
+
+    {% if transactions %}
+
+        <div class="transaction-list">
+
+            {% for transaction in transactions %}
+
+            <div class="professional-transaction">
+
+                <div class="transaction-main">
+
+                    <div class="
+                        transaction-direction
+                        {% if transaction.sender_id == current_user.id %}
+                            sent-icon
+                        {% else %}
+                            received-icon
+                        {% endif %}
+                    ">
+
+                        {% if transaction.sender_id == current_user.id %}
+                            ↗
+                        {% else %}
+                            ↙
+                        {% endif %}
+
+                    </div>
+
+
+                    <div>
+
+                        {% if transaction.sender_id == current_user.id %}
+
+                            <strong>
+                                Sent to {{ transaction.receiver.display_name }}
+                            </strong>
+
+                            <p>
+                                @{{ transaction.receiver.username }}
+                            </p>
+
+                        {% else %}
+
+                            <strong>
+                                Received from {{ transaction.sender.display_name }}
+                            </strong>
+
+                            <p>
+                                @{{ transaction.sender.username }}
+                            </p>
+
+                        {% endif %}
+
+
+                        {% if transaction.note %}
+
+                        <small>
+                            {{ transaction.note }}
+                        </small>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <div class="
+                    transaction-amount
+                    {% if transaction.sender_id == current_user.id %}
+                        amount-sent
+                    {% else %}
+                        amount-received
+                    {% endif %}
+                ">
+
+                    {% if transaction.sender_id == current_user.id %}
+                        -{{ transaction.amount|money }}
+                    {% else %}
+                        +{{ transaction.amount|money }}
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="professional-empty">
+
+            <div class="empty-icon">
+                ⌕
+            </div>
+
+            <h3>
+                No transactions found
+            </h3>
+
+            <p>
+                Try a different search or filter.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

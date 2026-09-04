@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Transfer Receipt{% endblock %}
+
+{% block content %}
+
+<div class="page-heading">
+    <div>
+        <p class="page-label">TRANSFER RECEIPT</p>
+        <h1>Transfer Successful</h1>
+        <p>Your transfer has been completed.</p>
+    </div>
+</div>
+
+<section class="receipt-card">
+
+    <div class="receipt-check">
+        ✓
+    </div>
+
+    <h2>{{ transaction.amount|money }}</h2>
+
+    <div class="receipt-info">
+
+        <div class="receipt-row">
+            <span>Recipient</span>
+            <strong>{{ transaction.receiver.display_name }}</strong>
+        </div>
+
+        <div class="receipt-row">
+            <span>Username</span>
+            <strong>@{{ transaction.receiver.username }}</strong>
+        </div>
+
+        <div class="receipt-row">
+            <span>Reference</span>
+            <strong>{{ reference_number }}</strong>
+        </div>
+
+        <div class="receipt-row">
+            <span>Time</span>
+            <strong>
+                {{ transaction.created_at.strftime("%d %B %Y %H:%M") }}
+            </strong>
+        </div>
+
+        <div class="receipt-row">
+            <span>Note</span>
+            <strong>{{ transaction.note or "No note" }}</strong>
+        </div>
+
+    </div>
+
+    <div class="receipt-buttons">
+
+        <a
+            href="{{ url_for('dashboard') }}"
+            class="receipt-secondary"
+        >
+            Dashboard
+        </a>
+
+        <a
+            href="{{ url_for('transactions') }}"
+            class="receipt-primary"
+        >
+            Transactions
+        </a>
+
+    </div>
+
+</section>
+
+{% endblock %}

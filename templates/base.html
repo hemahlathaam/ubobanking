@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <title>
+        {% block title %}MiniBank Demo{% endblock %}
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+</head>
+
+<body>
+
+{% if current_user.is_authenticated %}
+
+<div class="app-layout">
+
+    <aside class="sidebar">
+
+        <div class="sidebar-logo">
+            <div class="logo-icon">M</div>
+
+            <div>
+                <strong>MiniBank</strong>
+                <span>Demo Banking</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <a href="{{ url_for('dashboard') }}" class="sidebar-link">
+                <span>⌂</span>
+                <span class="sidebar-link-text">
+                    Dashboard
+                </span>
+            </a>
+
+            <a href="{{ url_for('transfer') }}" class="sidebar-link">
+                <span>↗</span>
+                <span class="sidebar-link-text">
+                    Transfer
+                </span>
+            </a>
+            <a href="{{ url_for('accounts') }}" class="sidebar-link">
+    <span>▣</span>
+
+    <span class="sidebar-link-text">
+        Accounts
+    </span>
+</a>
+
+            <a href="{{ url_for('transactions') }}" class="sidebar-link">
+                <span>☷</span>
+                <span class="sidebar-link-text">
+                    Transactions
+                </span>
+            </a>
+
+            <a href="{{ url_for('messages') }}" class="sidebar-link">
+                <span>✉</span>
+
+                <span class="sidebar-link-text">
+                    Messages
+                </span>
+
+                {% if unread_message_count > 0 %}
+                <span class="unread-badge">
+                    {{ unread_message_count }}
+                </span>
+                {% endif %}
+            </a>
+
+            <a href="{{ url_for('profile') }}" class="sidebar-link">
+                <span>◉</span>
+
+                <span class="sidebar-link-text">
+                    Profile
+                </span>
+            </a>
+
+            {% if current_user.is_admin %}
+
+            <div class="nav-divider"></div>
+
+            <p class="nav-title">
+                ADMINISTRATION
+            </p>
+
+            <a href="{{ url_for('admin_panel') }}" class="sidebar-link">
+                <span>⚙</span>
+
+                <span class="sidebar-link-text">
+                    Admin panel
+                </span>
+            </a>
+
+            {% endif %}
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <div class="sidebar-user">
+
+                {% if current_profile and current_profile.profile_image_url %}
+
+                    <div class="avatar sidebar-profile-image">
+                        <img
+                            src="{{ current_profile.profile_image_url }}"
+                            alt="Profile picture"
+                        >
+                    </div>
+
+                {% else %}
+
+                    <div class="avatar">
+                        {{ current_user.display_name[0]|upper }}
+                    </div>
+
+                {% endif %}
+
+                <div>
+                    <strong>
+                        {{ current_user.display_name }}
+                    </strong>
+
+                    <span>
+                        @{{ current_user.username }}
+                    </span>
+                </div>
+
+            </div>
+
+            <form action="{{ url_for('logout') }}" method="post">
+                <button class="logout-button" type="submit">
+                    Log out
+                </button>
+            </form>
+
+        </div>
+
+    </aside>
+
+    <div class="main-area">
+
+        <header class="topbar">
+
+            <p class="topbar-demo">
+                DEMO BANK — NO REAL MONEY
+            </p>
+
+            <div class="topbar-account">
+
+                {% if current_profile and current_profile.profile_image_url %}
+
+                    <div class="avatar small-avatar sidebar-profile-image">
+                        <img
+                            src="{{ current_profile.profile_image_url }}"
+                            alt="Profile picture"
+                        >
+                    </div>
+
+                {% else %}
+
+                    <div class="avatar small-avatar">
+                        {{ current_user.display_name[0]|upper }}
+                    </div>
+
+                {% endif %}
+
+                <span>
+                    {{ current_user.display_name }}
+                </span>
+
+            </div>
+
+        </header>
+
+        <main class="main-content">
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+
+                {% for category, message in messages %}
+
+                    <div class="flash {{ category }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+
+        </main>
+
+    </div>
+
+</div>
+
+{% else %}
+
+<div class="public-page">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% for category, message in messages %}
+
+            <div class="flash {{ category }}">
+                {{ message }}
+            </div>
+
+        {% endfor %}
+
+    {% endwith %}
+
+    {% block public_content %}{% endblock %}
+
+</div>
+
+{% endif %}
+
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+<script src="{{ url_for('static', filename='realtime.js') }}"></script>
+    
+</body>
+</html>
