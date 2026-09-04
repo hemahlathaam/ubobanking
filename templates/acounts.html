@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}
+Accounts | MiniBank
+{% endblock %}
+
+{% block content %}
+
+<div class="page-heading">
+    <div>
+        <p class="page-label">ACCOUNTS</p>
+        <h1>Your accounts</h1>
+        <p>Manage your checking and savings demo balances.</p>
+    </div>
+</div>
+
+<div class="accounts-balance-grid">
+
+    <section class="account-balance-card">
+        <span class="balance-label">CHECKING ACCOUNT</span>
+
+        <h2>{{ current_user.balance|money }}</h2>
+
+        <p>Available for transfers to other MiniBank users.</p>
+    </section>
+
+    <section class="account-balance-card savings-account-card">
+        <span class="balance-label">SAVINGS ACCOUNT</span>
+
+        <h2>{{ savings.balance|money }}</h2>
+
+        <p>Your separate demo savings balance.</p>
+    </section>
+
+</div>
+
+<section class="professional-panel">
+
+    <div class="panel-header">
+        <div>
+            <h2>Move money</h2>
+            <p>Transfer demo funds between your own accounts.</p>
+        </div>
+    </div>
+
+    <form
+        action="{{ url_for('move_money') }}"
+        method="post"
+        class="professional-form"
+    >
+
+        <div class="form-group">
+            <label>From account</label>
+
+            <select name="from_account" required>
+                <option value="checking">Checking</option>
+                <option value="savings">Savings</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>To account</label>
+
+            <select name="to_account" required>
+                <option value="savings">Savings</option>
+                <option value="checking">Checking</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Amount</label>
+
+            <input
+                name="amount"
+                type="number"
+                min="0.01"
+                step="0.01"
+                placeholder="0.00"
+                required
+            >
+        </div>
+
+        <button
+            type="submit"
+            class="primary-bank-button"
+        >
+            Move money
+        </button>
+
+    </form>
+
+</section>
+
+<section class="professional-panel">
+
+    <div class="panel-header">
+        <div>
+            <h2>Account transfer history</h2>
+            <p>Your latest checking and savings movements.</p>
+        </div>
+    </div>
+
+    {% if internal_transfers %}
+
+        <div class="transaction-list">
+
+            {% for transfer in internal_transfers %}
+
+                <div class="professional-transaction">
+
+                    <div class="transaction-main">
+
+                        <div class="transaction-direction">
+                            ↔
+                        </div>
+
+                        <div>
+                            <strong>
+                                {{ transfer.from_account|title }}
+                                →
+                                {{ transfer.to_account|title }}
+                            </strong>
+
+                            <p>
+                                Internal account transfer
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="transaction-amount">
+                        {{ transfer.amount|money }}
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="professional-empty">
+            <div class="empty-icon">↔</div>
+
+            <h3>No account transfers yet</h3>
+
+            <p>
+                Money moved between checking and savings will appear here.
+            </p>
+        </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}
