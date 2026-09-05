@@ -61,9 +61,9 @@ approved roadmap:
 - composable Admin and Developer roles (including users holding both roles),
   a management-only checking balance view, and audited demo-check
   deposits between enabled accounts;
-- per-transfer and 24-hour velocity limits, duplicate protection, scheduled
-  and recurring transfers, beneficiaries, a five-minute cancellation window,
-  and double-entry ledger entries;
+- unlimited transfers subject to valid amounts and available balances,
+  duplicate protection, scheduled and recurring transfers, beneficiaries, a
+  five-minute cancellation window, and double-entry ledger entries;
 - searchable audit logs, in-app Socket.IO notifications, and CSV statements
   (the PDF URL explicitly falls back to
   CSV when no renderer is installed);
@@ -84,8 +84,8 @@ Both badges appear together for dual-role accounts, with accessible labels and
 titles.
 
 Saved beneficiaries can be selected directly from the transfer form, approval
-requests are checked again for limits at approval time, and failed scheduled
-payments remain active for a later retry. Admins can grant and audit individual
+requests are checked again before execution, and failed scheduled payments
+remain active for a later retry. Admins can grant and audit individual
 permissions, while chat pages show reaction and read-receipt status.
 
 Admin/Developer role selection is stored in `UserRole` records. The legacy

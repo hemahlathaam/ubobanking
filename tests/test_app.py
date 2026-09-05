@@ -421,23 +421,22 @@ class MiniBankSmokeTests(unittest.TestCase):
             self.assertEqual(str(db.session.get(User, receiver_id).balance), "2.00")
             self.assertEqual(db.session.get(Transaction, transaction_id).status, "cancelled")
 
-    def test_transfer_limits_and_duplicate_protection(self):
+    def test_unlimited_transfers_and_duplicate_protection(self):
         self.login("admin", "StrongPass123")
         self.create_user("velocity-source", balance="10000.00")
         self.create_user("velocity-receiver", balance="0.00")
         self.client.post("/logout")
         self.login("velocity-source", "Password123")
 
-        limited = self.client.post(
+        large_transfer = self.client.post(
             "/transfer",
             data={
                 "receiver_username": "velocity-receiver",
                 "amount": "5001.00",
-                "note": "Over limit",
+                "note": "No transfer cap",
             },
-            follow_redirects=True,
         )
-        self.assertIn(b"per-transfer limit", limited.data)
+        self.assertEqual(large_transfer.status_code, 302)
 
         first = self.client.post(
             "/transfer",

@@ -781,20 +781,6 @@ def add_ledger_entries(transaction):
     )
 
 
-def transfer_limit_error(sender, amount):
-    if amount > Decimal("5000.00"):
-        return "The per-transfer limit is $5,000.00."
-    since = datetime.now(timezone.utc) - timedelta(days=1)
-    daily_total = db.session.query(db.func.coalesce(db.func.sum(Transaction.amount), 0)).filter(
-        Transaction.sender_id == sender.id,
-        Transaction.created_at >= since,
-        Transaction.status == "completed",
-    ).scalar()
-    if Decimal(daily_total or 0) + amount > Decimal("10000.00"):
-        return "The 24-hour transfer limit is $10,000.00."
-    return None
-
-
 def parse_datetime(value, default=None):
     if not value:
         return default
@@ -1321,11 +1307,6 @@ def transfer():
 
             return redirect(url_for("transfer"))
 
-        limit_error = transfer_limit_error(current_user, amount)
-        if limit_error:
-            flash(limit_error, "error")
-            return redirect(url_for("transfer"))
-
         note = request.form.get(
             "note",
             "",
@@ -1451,10 +1432,6 @@ def admin_transfer():
     ).first()
     if duplicate:
         flash("A matching privileged transfer was submitted recently.", "error")
-        return redirect(url_for("admin_panel"))
-    limit_error = transfer_limit_error(source, amount)
-    if limit_error:
-        flash(limit_error, "error")
         return redirect(url_for("admin_panel"))
 
     # One transaction covers both balance changes, the transaction, and the
@@ -1616,10 +1593,6 @@ def request_privileged_transfer():
     ):
         flash("Enabled, different accounts, a positive amount, and a reason are required.", "error")
         return redirect(url_for("admin_panel"))
-    error = transfer_limit_error(source, amount)
-    if error:
-        flash(error, "error")
-        return redirect(url_for("admin_panel"))
     duplicate = Transaction.query.filter(
         Transaction.sender_id == source.id,
         Transaction.receiver_id == receiver.id,
@@ -1673,8 +1646,6 @@ def approve_privileged_transfer(request_record):
         or not receiver.is_enabled
         or request_record.amount > Decimal(source.balance)
     ):
-        return False
-    if transfer_limit_error(source, request_record.amount):
         return False
     duplicate = Transaction.query.filter(
         Transaction.sender_id == source.id,
@@ -2899,7 +2870,6 @@ def scheduled_transfers():
         if (
             schedule.receiver.is_enabled
             and Decimal(current_user.balance) >= schedule.amount
-            and not transfer_limit_error(current_user, schedule.amount)
         ):
             current_user.balance = Decimal(current_user.balance) - schedule.amount
             schedule.receiver.balance = Decimal(schedule.receiver.balance) + schedule.amount
@@ -2946,7 +2916,6 @@ def scheduled_transfers():
             or receiver.id == current_user.id
             or not receiver.is_enabled
             or amount <= 0
-            or amount > Decimal("5000.00")
             or interval < 0
         ):
             flash("Choose an enabled recipient, a positive amount, and a valid schedule.", "error")
@@ -3263,8 +3232,6 @@ def bills():
             amount = Decimal("0.00")
         if not payee or amount <= 0 or amount > Decimal(current_user.balance):
             flash("Enter a payee and a positive amount within your balance.", "error")
-        elif transfer_limit_error(current_user, amount):
-            flash(transfer_limit_error(current_user, amount), "error")
         else:
             current_user.balance = Decimal(current_user.balance) - amount
             bill = BillPayment(
