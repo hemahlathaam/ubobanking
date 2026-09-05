@@ -348,9 +348,6 @@ class MiniBankSmokeTests(unittest.TestCase):
             "/admin/audit-logs",
             "/beneficiaries",
             "/scheduled-transfers",
-            "/notification-preferences",
-            "/support",
-            "/bills",
             "/cards",
         ):
             self.assertEqual(self.client.get(path).status_code, 200, path)
@@ -375,36 +372,12 @@ class MiniBankSmokeTests(unittest.TestCase):
             ).status_code,
             302,
         )
-        self.assertEqual(
-            self.client.post(
-                "/bills",
-                data={"payee": "Demo utility", "amount": "1.00"},
-            ).status_code,
-            302,
-        )
         self.assertEqual(self.client.post("/cards").status_code, 302)
-        self.assertEqual(
-            self.client.post(
-                "/notification-preferences",
-                data={"email_enabled": "on", "email_address": "demo@example.test"},
-            ).status_code,
-            302,
-        )
-        self.assertEqual(
-            self.client.post(
-                "/support",
-                data={"subject": "Smoke", "description": "Local support ticket"},
-            ).status_code,
-            302,
-        )
         self.assertEqual(self.client.get("/notifications").status_code, 200)
         with app.app_context():
             self.assertEqual(Beneficiary.query.count(), 1)
             self.assertEqual(ScheduledTransfer.query.count(), 1)
-            self.assertEqual(BillPayment.query.count(), 1)
-            self.assertEqual(BillPaymentLedgerEntry.query.count(), 2)
             self.assertEqual(VirtualCard.query.count(), 1)
-            self.assertEqual(SupportTicket.query.count(), 1)
             self.assertGreaterEqual(Notification.query.count(), 0)
 
         response = self.client.post(

@@ -7,8 +7,7 @@ payments are local simulation data.
 All timestamps are stored as UTC-aware values where the database supports
 timezones. The shared `sgt` template filter converts every displayed timestamp
 to `SGT / Asia/Singapore (UTC+8)`, including transactions, messages, audit
-events, notifications, scheduled transfers, statements, support replies, and
-bill payments. Datetime fields entered in the UI (such as scheduled transfers)
+events, notifications, scheduled transfers, and statements. Datetime fields entered in the UI (such as scheduled transfers)
 are interpreted as Singapore time and normalized to UTC for storage.
 
 ## Run on Windows
@@ -65,13 +64,12 @@ approved roadmap:
 - per-transfer and 24-hour velocity limits, duplicate protection, scheduled
   and recurring transfers, beneficiaries, a five-minute cancellation window,
   and double-entry ledger entries;
-- searchable audit logs, in-app Socket.IO notifications, local email/SMS
-  preference records, CSV statements (the PDF URL explicitly falls back to
+- searchable audit logs, in-app Socket.IO notifications, and CSV statements
+  (the PDF URL explicitly falls back to
   CSV when no renderer is installed);
 - group owners/moderators, reactions, URL attachments, @mentions, read
   receipts, and unread counters;
-- local support tickets, simulated bill payments, and virtual cards with
-  freeze/unfreeze and spending-limit controls.
+- virtual cards with freeze/unfreeze and spending-limit controls.
 
 No feature sends money, email, SMS, or card transactions to an external
 provider. Scheduled transfers are processed when the owner visits the
@@ -86,7 +84,6 @@ winged Patron-style crown emblem and Developer uses a `</>` coding emblem.
 Both badges appear together for dual-role accounts, with accessible labels and
 titles.
 
-Bill payments also create balanced local clearing entries in the demo ledger.
 Saved beneficiaries can be selected directly from the transfer form, approval
 requests are checked again for limits at approval time, and failed scheduled
 payments remain active for a later retry. Admins can grant and audit individual

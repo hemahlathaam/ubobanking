@@ -2882,6 +2882,7 @@ def notifications():
 @app.route("/notification-preferences", methods=["GET", "POST"])
 @login_required
 def notification_preferences():
+    abort(404)
     preferences = NotificationPreference.query.filter_by(user_id=current_user.id).first()
     if not preferences:
         preferences = NotificationPreference(user_id=current_user.id)
@@ -3197,6 +3198,7 @@ def update_permissions(user_id):
 @app.route("/support", methods=["GET", "POST"])
 @login_required
 def support():
+    abort(404)
     if request.method == "POST":
         subject = request.form.get("subject", "").strip()[:160]
         description = request.form.get("description", "").strip()
@@ -3228,6 +3230,7 @@ def support():
 @app.route("/support/<int:ticket_id>", methods=["GET", "POST"])
 @login_required
 def support_ticket(ticket_id):
+    abort(404)
     ticket = db.session.get(SupportTicket, ticket_id)
     if not ticket:
         abort(404)
@@ -3263,6 +3266,7 @@ def support_ticket(ticket_id):
 @app.route("/bills", methods=["GET", "POST"])
 @login_required
 def bills():
+    abort(404)
     if request.method == "POST":
         payee = request.form.get("payee", "").strip()[:120]
         reference = request.form.get("reference", "").strip()[:120]
