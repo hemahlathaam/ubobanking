@@ -69,7 +69,6 @@ approved roadmap:
   CSV when no renderer is installed);
 - group owners/moderators, reactions, URL attachments, @mentions, read
   receipts, and unread counters;
-- virtual cards with freeze/unfreeze and spending-limit controls.
 
 No feature sends money, email, SMS, or card transactions to an external
 provider. Scheduled transfers are processed when the owner visits the

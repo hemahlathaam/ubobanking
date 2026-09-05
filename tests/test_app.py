@@ -27,7 +27,6 @@ from app import (
     SupportTicket,
     BillPayment,
     BillPaymentLedgerEntry,
-    VirtualCard,
     PrivilegedTransferRequest,
     CheckDeposit,
     UserRole,
@@ -348,7 +347,6 @@ class MiniBankSmokeTests(unittest.TestCase):
             "/admin/audit-logs",
             "/beneficiaries",
             "/scheduled-transfers",
-            "/cards",
         ):
             self.assertEqual(self.client.get(path).status_code, 200, path)
         self.assertEqual(self.client.get("/statements").status_code, 200)
@@ -372,12 +370,10 @@ class MiniBankSmokeTests(unittest.TestCase):
             ).status_code,
             302,
         )
-        self.assertEqual(self.client.post("/cards").status_code, 302)
         self.assertEqual(self.client.get("/notifications").status_code, 200)
         with app.app_context():
             self.assertEqual(Beneficiary.query.count(), 1)
             self.assertEqual(ScheduledTransfer.query.count(), 1)
-            self.assertEqual(VirtualCard.query.count(), 1)
             self.assertGreaterEqual(Notification.query.count(), 0)
 
         response = self.client.post(

@@ -648,18 +648,6 @@ class BillPaymentLedgerEntry(db.Model):
     )
 
 
-class VirtualCard(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    last_four = db.Column(db.String(4), nullable=False)
-    card_token = db.Column(db.String(64), nullable=False, unique=True)
-    status = db.Column(db.String(20), nullable=False, default="active")
-    spending_limit = db.Column(db.Numeric(12, 2), nullable=False, default=Decimal("1000.00"))
-    online_enabled = db.Column(db.Boolean, nullable=False, default=True)
-    created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    user = db.relationship("User", foreign_keys=[user_id])
-
-
 class CheckDeposit(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     actor_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
@@ -2320,7 +2308,6 @@ def delete_user(user_id):
     BillPaymentLedgerEntry.query.filter_by(account_id=user.id).delete(
         synchronize_session=False
     )
-    VirtualCard.query.filter_by(user_id=user.id).delete(synchronize_session=False)
     UserRole.query.filter_by(user_id=user.id).delete(synchronize_session=False)
 
     UserProfile.query.filter_by(
@@ -3314,57 +3301,6 @@ def bills():
         BillPayment.created_at.desc()
     ).all()
     return render_template("bills.html", payments=payments)
-
-
-@app.route("/cards", methods=["GET", "POST"])
-@login_required
-def cards():
-    if request.method == "POST":
-        card = VirtualCard(
-            user_id=current_user.id,
-            last_four="".join(secrets.choice("0123456789") for _ in range(4)),
-            card_token=secrets.token_hex(24),
-        )
-        db.session.add(card)
-        db.session.commit()
-        flash("Virtual card created. This demo card has no external payment capability.", "success")
-        return redirect(url_for("cards"))
-    cards_for_user = VirtualCard.query.filter_by(user_id=current_user.id).order_by(
-        VirtualCard.created_at.desc()
-    ).all()
-    return render_template("cards.html", cards=cards_for_user)
-
-
-@app.route("/cards/<int:card_id>/control", methods=["POST"])
-@login_required
-def card_control(card_id):
-    card = db.session.get(VirtualCard, card_id)
-    if not card or card.user_id != current_user.id:
-        abort(404)
-    action = request.form.get("action")
-    if action == "freeze":
-        card.status = "frozen"
-    elif action == "unfreeze":
-        card.status = "active"
-    elif action == "online":
-        card.online_enabled = request.form.get("enabled") == "true"
-    elif action == "limit":
-        try:
-            limit = Decimal(request.form.get("spending_limit", "")).quantize(Decimal("0.01"))
-            if limit < 0:
-                raise InvalidOperation
-            card.spending_limit = limit
-        except (InvalidOperation, ValueError, TypeError):
-            flash("Enter a valid spending limit.", "error")
-            return redirect(url_for("cards"))
-    record_audit(
-        "virtual_card_control_changed",
-        current_user.id,
-        f"card={card.id}; action={action}",
-    )
-    db.session.commit()
-    flash("Card controls updated.", "success")
-    return redirect(url_for("cards"))
 
 
 # =========================================================
