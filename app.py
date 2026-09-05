@@ -3370,6 +3370,27 @@ def card_control(card_id):
 with app.app_context():
     db.create_all()
 
+    # Add columns required by the current ORM before any User queries run.
+    # create_all() does not alter existing PostgreSQL tables.
+    user_columns = {
+        column["name"] for column in inspect(db.engine).get_columns("user")
+    }
+    if "account_type" not in user_columns:
+        db.session.execute(
+            text(
+                'ALTER TABLE "user" ADD COLUMN account_type '
+                "VARCHAR(20) NOT NULL DEFAULT 'standard'"
+            )
+        )
+        db.session.commit()
+        db.session.execute(
+            text(
+                'UPDATE "user" SET account_type = \'admin\' '
+                "WHERE is_admin = 1"
+            )
+        )
+        db.session.commit()
+
     # Migrate legacy savings balances exactly once before retiring the table.
     # The update and DROP occur in one transaction so a failed migration does
     # not destroy the legacy rows or create duplicate funds on restart.
@@ -3393,25 +3414,6 @@ with app.app_context():
             raise
     if "internal_transfer" in legacy_tables:
         db.session.execute(text("DROP TABLE internal_transfer"))
-        db.session.commit()
-
-    if "account_type" not in {
-        column["name"]
-        for column in inspect(db.engine).get_columns("user")
-    }:
-        db.session.execute(
-            text(
-                "ALTER TABLE user ADD COLUMN account_type "
-                "VARCHAR(20) NOT NULL DEFAULT 'standard'"
-            )
-        )
-        db.session.commit()
-        db.session.execute(
-            text(
-                "UPDATE user SET account_type = 'admin' "
-                "WHERE is_admin = 1"
-            )
-        )
         db.session.commit()
 
     # Lightweight compatibility migrations for demo databases created before
