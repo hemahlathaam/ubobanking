@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Scheduled transfers | MiniBank{% endblock %}
+{% block content %}
+<section class="professional-panel">
+    <h1>Scheduled and recurring transfers</h1>
+    <form method="post" class="professional-form">
+        <input name="receiver_username" placeholder="Recipient username" required>
+        <input name="amount" type="number" min="0.01" step="0.01" placeholder="Amount" required>
+        <label for="next-run-at">Next run ({{ display_timezone }})</label>
+        <input id="next-run-at" name="next_run_at" type="datetime-local">
+        <input name="interval_days" type="number" min="0" placeholder="Repeat every N days (optional)">
+        <input name="note" maxlength="200" placeholder="Note">
+        <button class="button" type="submit">Schedule transfer</button>
+    </form>
+    {% for schedule in schedules %}
+    <div class="row"><span>{{ schedule.amount|money }} to @{{ schedule.receiver.username }} · next {{ schedule.next_run_at|sgt }} · {% if schedule.active %}active{% else %}cancelled{% endif %}</span>
+        {% if schedule.active %}<form method="post" action="{{ url_for('cancel_scheduled_transfer', schedule_id=schedule.id) }}"><button type="submit">Cancel</button></form>{% endif %}
+    </div>
+    {% else %}<p>No scheduled transfers.</p>{% endfor %}
+</section>
+{% endblock %}

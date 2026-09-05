@@ -19,7 +19,7 @@ Dashboard | MiniBank
         </h1>
 
         <p>
-            Here's an overview of your demo account.
+            Here's an overview of your demo checking account and recent activity.
         </p>
     </div>
 
@@ -69,7 +69,7 @@ Dashboard | MiniBank
             <span>ACCOUNT TYPE</span>
 
             <strong>
-                Demo Account
+                Demo checking
             </strong>
         </div>
 
@@ -213,6 +213,11 @@ Dashboard | MiniBank
                         </small>
 
                         {% endif %}
+
+                        <small class="transaction-reference">
+                            Reference: TXN-{{ "%08d"|format(transaction.id) }}
+                            · {{ transaction.created_at|sgt }}
+                        </small>
 
                     </div>
 

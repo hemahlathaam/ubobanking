@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Notification settings | MiniBank{% endblock %}
+{% block content %}
+<section class="professional-panel">
+    <h1>Notification settings</h1>
+    <p>Email and SMS are local demo preferences; no external messages are sent.</p>
+    <form method="post" class="professional-form">
+        <label><input type="checkbox" name="email_enabled" {% if preferences.email_enabled %}checked{% endif %}> Email alerts</label>
+        <input name="email_address" type="email" placeholder="Email address" value="{{ preferences.email_address }}">
+        <label><input type="checkbox" name="sms_enabled" {% if preferences.sms_enabled %}checked{% endif %}> SMS alerts</label>
+        <input name="phone_number" placeholder="Phone number" value="{{ preferences.phone_number }}">
+        <button class="button" type="submit">Save preferences</button>
+    </form>
+</section>
+{% endblock %}

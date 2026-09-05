@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-Chat with {{ other_user.display_name }} | MiniBank
+{% if group %}{{ group.name }}{% else %}Chat with {{ other_user.display_name }}{% endif %} | MiniBank
 {% endblock %}
 
 {% block content %}
@@ -10,15 +10,15 @@ Chat with {{ other_user.display_name }} | MiniBank
 
     <div>
         <p class="page-label">
-            PRIVATE MESSAGE
+            {% if group %}GROUP CHAT{% else %}PRIVATE MESSAGE{% endif %}
         </p>
 
         <h1>
-            {{ other_user.display_name }}
+            {% if group %}{{ group.name }}{% else %}{{ other_user.display_name }}{% endif %}
         </h1>
 
         <p>
-            @{{ other_user.username }}
+            {% if group %}Owned by @{{ group.creator.username }}{% else %}@{{ other_user.username }}{% endif %}
         </p>
     </div>
 
@@ -29,16 +29,14 @@ Chat with {{ other_user.display_name }} | MiniBank
     <div class="chat-header">
 
         <div class="message-avatar">
-            {{ other_user.display_name[0]|upper }}
+            {% if group %}#{% else %}{{ other_user.display_name[0]|upper }}{% endif %}
         </div>
 
         <div>
-            <strong>
-                {{ other_user.display_name }}
-            </strong>
+            <strong>{% if group %}{{ group.name }}{% else %}{{ other_user.display_name }}{% endif %}</strong>
 
             <span>
-                @{{ other_user.username }}
+                {% if group %}{{ members|length }} member(s){% else %}@{{ other_user.username }}{% endif %}
             </span>
         </div>
 
@@ -68,15 +66,33 @@ Chat with {{ other_user.display_name }} | MiniBank
                     {% endif %}
                 ">
 
-                    <p>
-                        {{ message.content }}
-                    </p>
+                    {% if group %}<strong>@{{ message.sender.username }}</strong>{% endif %}
+                    <p>{{ message.content }}</p>
+                    {% if attachments.get(message.id) %}
+                    {% for attachment in attachments.get(message.id) %}
+                    <a href="{{ attachment.url }}" rel="noreferrer">{{ attachment.filename }}</a>
+                    {% endfor %}
+                    {% endif %}
 
                     <span>
-                        {{ message.created_at.strftime('%d %b · %H:%M') }}
+                        {{ message.created_at|sgt }}
                     </span>
+                    {% if reactions.get(message.id) %}
+                    <small>Reactions: {{ reactions.get(message.id)|join(" ") }}</small>
+                    {% endif %}
+                    {% if receipt_counts.get(message.id, 0) %}
+                    <small>
+                        {% if group %}Read by {{ receipt_counts.get(message.id) }} member(s)
+                        {% elif message.sender_id == current_user.id %}Seen{% endif %}
+                    </small>
+                    {% endif %}
 
                 </div>
+                <form method="post"
+                      action="{% if group %}{{ url_for('react_to_group_message', message_id=message.id) }}{% else %}{{ url_for('react_to_message', message_id=message.id) }}{% endif %}">
+                    <button type="submit" name="emoji" value="👍">👍</button>
+                    <button type="submit" name="emoji" value="❤️">❤️</button>
+                </form>
 
             </div>
 
@@ -110,6 +126,8 @@ Chat with {{ other_user.display_name }} | MiniBank
             rows="2"
             required
         ></textarea>
+        <input name="attachment_url" type="url" placeholder="Attachment URL (optional)">
+        <input name="attachment_name" maxlength="160" placeholder="Attachment name">
 
         <button
             type="submit"
@@ -121,5 +139,35 @@ Chat with {{ other_user.display_name }} | MiniBank
     </form>
 
 </section>
+
+{% if group %}
+<section class="professional-panel">
+    <h2>Members</h2>
+    {% for membership in members %}
+    <div class="row">
+        <span>@{{ membership.user.username }} ({{ membership.role }})</span>
+        {% if is_owner and membership.user_id != group.creator_id %}
+        <form method="post" action="{{ url_for('manage_group_members', group_id=group.id) }}">
+            <input type="hidden" name="action" value="remove">
+            <input type="hidden" name="username" value="{{ membership.user.username }}">
+            <button type="submit">Remove</button>
+        </form>
+        <form method="post" action="{{ url_for('manage_group_members', group_id=group.id) }}">
+            <input type="hidden" name="action" value="{% if membership.role == 'moderator' %}demote{% else %}promote{% endif %}">
+            <input type="hidden" name="username" value="{{ membership.user.username }}">
+            <button type="submit">{% if membership.role == 'moderator' %}Demote{% else %}Make moderator{% endif %}</button>
+        </form>
+        {% endif %}
+    </div>
+    {% endfor %}
+    {% if is_owner %}
+    <form method="post" action="{{ url_for('manage_group_members', group_id=group.id) }}" class="chat-form">
+        <input name="username" placeholder="Username to add" required>
+        <input type="hidden" name="action" value="add">
+        <button type="submit">Add member</button>
+    </form>
+    {% endif %}
+</section>
+{% endif %}
 
 {% endblock %}

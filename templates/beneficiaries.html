@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Beneficiaries | MiniBank{% endblock %}
+{% block content %}
+<section class="professional-panel">
+    <h1>Beneficiaries</h1>
+    <form method="post" class="professional-form">
+        <input name="username" placeholder="Enabled username" required>
+        <input name="nickname" maxlength="80" placeholder="Nickname" required>
+        <button class="button" type="submit">Add beneficiary</button>
+    </form>
+    {% for item in beneficiaries %}
+    <div class="row"><span>{{ item.nickname }} (@{{ item.beneficiary.username }})</span>
+        <form method="post" action="{{ url_for('delete_beneficiary', beneficiary_id=item.id) }}"><button type="submit">Remove</button></form>
+    </div>
+    {% else %}<p>No beneficiaries yet.</p>{% endfor %}
+</section>
+{% endblock %}

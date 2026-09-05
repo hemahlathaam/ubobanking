@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+{% from "_role_badges.html" import role_badges %}
 <head>
     <meta charset="utf-8">
 
@@ -72,10 +73,18 @@
                     Messages
                 </span>
 
-                {% if unread_message_count > 0 %}
+                {% if unread_message_count + unread_group_message_count > 0 %}
                 <span class="unread-badge">
-                    {{ unread_message_count }}
+                    {{ unread_message_count + unread_group_message_count }}
                 </span>
+                {% endif %}
+            </a>
+
+            <a href="{{ url_for('groups') }}" class="sidebar-link">
+                <span>#</span>
+                <span class="sidebar-link-text">Group chats</span>
+                {% if unread_group_message_count > 0 %}
+                <span class="unread-badge">{{ unread_group_message_count }}</span>
                 {% endif %}
             </a>
 
@@ -87,7 +96,36 @@
                 </span>
             </a>
 
-            {% if current_user.is_admin %}
+            <a href="{{ url_for('notifications') }}" class="sidebar-link">
+                <span>!</span>
+                <span class="sidebar-link-text">Notifications</span>
+                {% if unread_notification_count %}
+                <span class="unread-badge">{{ unread_notification_count }}</span>
+                {% endif %}
+            </a>
+            <a href="{{ url_for('beneficiaries') }}" class="sidebar-link">
+                <span>★</span><span class="sidebar-link-text">Beneficiaries</span>
+            </a>
+            <a href="{{ url_for('scheduled_transfers') }}" class="sidebar-link">
+                <span>◷</span><span class="sidebar-link-text">Scheduled</span>
+            </a>
+            <a href="{{ url_for('statements') }}" class="sidebar-link">
+                <span>▤</span><span class="sidebar-link-text">Statements</span>
+            </a>
+            <a href="{{ url_for('notification_preferences') }}" class="sidebar-link">
+                <span>◌</span><span class="sidebar-link-text">Notification settings</span>
+            </a>
+            <a href="{{ url_for('support') }}" class="sidebar-link">
+                <span>?</span><span class="sidebar-link-text">Support</span>
+            </a>
+            <a href="{{ url_for('bills') }}" class="sidebar-link">
+                <span>▥</span><span class="sidebar-link-text">Bill pay</span>
+            </a>
+            <a href="{{ url_for('cards') }}" class="sidebar-link">
+                <span>▰</span><span class="sidebar-link-text">Virtual cards</span>
+            </a>
+
+            {% if current_user.has_management_access %}
 
             <div class="nav-divider"></div>
 
@@ -136,6 +174,7 @@
                     <span>
                         @{{ current_user.username }}
                     </span>
+                    {{ role_badges(current_user) }}
                 </div>
 
             </div>
@@ -155,10 +194,25 @@
         <header class="topbar">
 
             <p class="topbar-demo">
-                DEMO BANK — NO REAL MONEY
+                DEMO BANK — NO REAL MONEY · {{ display_timezone }}
             </p>
 
+            {% if impersonator %}
+            <div class="flash warning" style="margin: 0;">
+                Impersonating <strong>@{{ current_user.username }}</strong>
+                (actor: @{{ impersonator.username }})
+                <form action="{{ url_for('stop_impersonation') }}" method="post" style="display:inline">
+                    <button type="submit">Return to management account</button>
+                </form>
+            </div>
+            {% endif %}
+
             <div class="topbar-account">
+
+                <div class="topbar-security-status">
+                    <span class="status-dot"></span>
+                    <span>Account active · Demo session</span>
+                </div>
 
                 {% if current_profile and current_profile.profile_image_url %}
 
@@ -177,9 +231,10 @@
 
                 {% endif %}
 
-                <span>
-                    {{ current_user.display_name }}
-                </span>
+                <div class="topbar-user-meta">
+                    <span>{{ current_user.display_name }}</span>
+                    {{ role_badges(current_user) }}
+                </div>
 
             </div>
 
@@ -228,6 +283,8 @@
 </div>
 
 {% endif %}
+
+<footer class="site-footer">Copyright Pranav Hemahlathaa Harish and Hari Suhanth Karthikeyan, 2026.</footer>
 
 <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 <script src="{{ url_for('static', filename='realtime.js') }}"></script>

@@ -1,9 +1,14 @@
 {% extends "base.html" %}
+{% from "_role_badges.html" import role_badges %}
 
 {% block content %}
 
 <section class="card">
     <h1>Admin panel</h1>
+    <p>
+        <a href="{{ url_for('audit_logs') }}">Search audit logs</a> ·
+        <a href="{{ url_for('management_balances') }}">View checking balances</a>
+    </p>
 
     <form action="{{ url_for('create_user') }}" method="post">
 
@@ -26,19 +31,76 @@
             required
         >
 
-        <label>
-            <input
-                type="checkbox"
-                name="is_admin"
-                style="width:auto"
-            >
-            Make administrator
-        </label>
+        <label>Composable roles (select either or both)</label>
+        <label><input type="checkbox" name="role" value="developer"> Developer</label>
+        <label><input type="checkbox" name="role" value="admin"> Admin</label>
+        <input type="hidden" name="account_type" value="standard">
 
         <button class="button" type="submit">
             Create account
         </button>
 
+    </form>
+</section>
+
+<section class="card">
+    <h2>Privileged transfer</h2>
+    <p>Move funds between enabled accounts. Every transfer requires a reason and is audited.</p>
+    <form action="{{ url_for('admin_transfer') }}" method="post">
+        <label>Source username</label>
+        <input name="source_username" required>
+        <label>Recipient username</label>
+        <input name="receiver_username" required>
+        <label>Amount</label>
+        <input name="amount" type="number" min="0.01" step="0.01" required>
+        <label>Mandatory reason</label>
+        <input name="reason" maxlength="200" required>
+        <button class="button" type="submit">Transfer funds</button>
+    </form>
+</section>
+
+<section class="card">
+    <h2>Transfer approvals</h2>
+    <p>Use the approval form for a second-person review workflow.</p>
+    <form action="{{ url_for('request_privileged_transfer') }}" method="post">
+        <input name="source_username" placeholder="Source username" required>
+        <input name="receiver_username" placeholder="Recipient username" required>
+        <input name="amount" type="number" min="0.01" step="0.01" required>
+        <input name="reason" maxlength="200" placeholder="Reason" required>
+        <button class="button" type="submit">Submit for approval</button>
+    </form>
+    {% for item in pending_transfer_requests %}
+    <div class="row">
+        <span>#{{ item.id }} {{ item.source.username }} → {{ item.receiver.username }} · {{ item.amount|money }} · {{ item.reason }}</span>
+        <span>
+            {% if current_user.has_permission("approve_transfer") %}
+            <form action="{{ url_for('approve_privileged_transfer_route', request_id=item.id) }}" method="post" style="display:inline">
+                <button type="submit">Approve</button>
+            </form>
+            <form action="{{ url_for('reject_privileged_transfer', request_id=item.id) }}" method="post" style="display:inline">
+                <button type="submit">Reject</button>
+            </form>
+            {% else %}Awaiting an administrator{% endif %}
+        </span>
+    </div>
+    {% endfor %}
+</section>
+
+<section class="card">
+    <h2>Deposit demo check</h2>
+    <p>Post a local check from one enabled account to another. The writer is debited, the recipient is credited atomically, and the check details are audited.</p>
+    <form action="{{ url_for('deposit_demo_check') }}" method="post">
+        <label>Check writer username</label>
+        <input name="source_username" required>
+        <label>Recipient username</label>
+        <input name="recipient_username" required>
+        <label>Amount</label>
+        <input name="amount" type="number" min="0.01" step="0.01" required>
+        <label>Check number</label>
+        <input name="check_number" maxlength="80" required>
+        <label>Reference / memo</label>
+        <input name="reference" maxlength="200" required>
+        <button class="button" type="submit">Post demo check</button>
     </form>
 </section>
 
@@ -55,9 +117,11 @@
             <strong>
                 {{ u.display_name }} (@{{ u.username }})
             </strong>
+            {{ role_badges(u) }}
 
             <p>
-                {{ u.balance|money }}
+                {{ u.balance|money }} ·
+                Roles: {% if u.roles %}{{ u.roles|join(", ")|title }}{% else %}Standard{% endif %}
 
                 {% if u.is_enabled %}
                     · Enabled
@@ -69,6 +133,13 @@
 
 
         <div class="admin-user-actions">
+
+            <form action="{{ url_for('update_roles', user_id=u.id) }}" method="post">
+                <label>Roles</label>
+                <label><input type="checkbox" name="role" value="developer" {% if "developer" in u.roles %}checked{% endif %}> Developer</label>
+                <label><input type="checkbox" name="role" value="admin" {% if "admin" in u.roles %}checked{% endif %}> Admin</label>
+                <button type="submit">Save roles</button>
+            </form>
 
             <form
                 action="{{ url_for('set_balance', user_id=u.id) }}"
@@ -104,6 +175,25 @@
                 <button type="submit">
                     Reset password
                 </button>
+            </form>
+
+            {% if u.id != current_user.id and u.is_enabled %}
+            <form action="{{ url_for('start_impersonation', user_id=u.id) }}" method="post">
+                <input name="reason" maxlength="200" placeholder="Impersonation reason" required>
+                <button type="submit">Impersonate</button>
+            </form>
+            {% endif %}
+
+            <form action="{{ url_for('update_permissions', user_id=u.id) }}" method="post">
+                <label><input type="checkbox" name="permission" value="balance_read" {% if "balance_read" in permission_map.get(u.id, []) %}checked{% endif %}> Balance view</label>
+                <label><input type="checkbox" name="permission" value="check_deposit" {% if "check_deposit" in permission_map.get(u.id, []) %}checked{% endif %}> Demo check deposit</label>
+                <label><input type="checkbox" name="permission" value="impersonate" {% if "impersonate" in permission_map.get(u.id, []) %}checked{% endif %}> Impersonate</label>
+                <label><input type="checkbox" name="permission" value="privileged_transfer" {% if "privileged_transfer" in permission_map.get(u.id, []) %}checked{% endif %}> Privileged transfers</label>
+                <label><input type="checkbox" name="permission" value="approve_transfer" {% if "approve_transfer" in permission_map.get(u.id, []) %}checked{% endif %}> Approve transfers</label>
+                <label><input type="checkbox" name="permission" value="audit_read" {% if "audit_read" in permission_map.get(u.id, []) %}checked{% endif %}> Audit logs</label>
+                <label><input type="checkbox" name="permission" value="support_manage" {% if "support_manage" in permission_map.get(u.id, []) %}checked{% endif %}> Support manager</label>
+                <label><input type="checkbox" name="permission" value="manage_groups" {% if "manage_groups" in permission_map.get(u.id, []) %}checked{% endif %}> Group manager</label>
+                <button type="submit">Save permissions</button>
             </form>
 
 

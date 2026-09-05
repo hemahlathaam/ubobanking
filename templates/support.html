@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Support | MiniBank{% endblock %}
+{% block content %}
+<section class="professional-panel">
+    <h1>Support tickets</h1>
+    <form method="post" class="professional-form"><input name="subject" maxlength="160" placeholder="Subject" required><textarea name="description" maxlength="5000" placeholder="Describe the issue" required></textarea><button class="button" type="submit">Open ticket</button></form>
+    {% for ticket in tickets %}<div class="row"><a href="{{ url_for('support_ticket', ticket_id=ticket.id) }}">#{{ ticket.id }} {{ ticket.subject }}</a><span>{{ ticket.status }}</span></div>{% else %}<p>No tickets.</p>{% endfor %}
+</section>
+{% endblock %}

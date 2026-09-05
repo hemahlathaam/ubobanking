@@ -140,6 +140,62 @@ input {
     font-size: 12px;
 }
 
+.role-badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+    margin-top: 6px;
+}
+
+.role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.25px;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.role-badge-mark {
+    font-size: 11px;
+    letter-spacing: -1px;
+}
+
+.role-badge-admin {
+    color: #6f4b00;
+    background: #fff3cf;
+    border-color: #edd38b;
+}
+
+.role-badge-developer {
+    color: #1746a2;
+    background: #e7efff;
+    border-color: #b9ccfa;
+}
+
+.role-badge-standard {
+    color: #526174;
+    background: #eef2f6;
+    border-color: #d9e0e8;
+}
+
+.topbar-user-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+}
+
+.topbar-user-meta > span:first-child {
+    color: var(--text);
+}
+
 .avatar {
     width: 42px;
     height: 42px;
@@ -197,6 +253,24 @@ input {
     gap: 9px;
     font-size: 13px;
     font-weight: 600;
+}
+
+.topbar-security-status {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-right: 18px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 3px var(--green-bg);
 }
 
 .small-avatar {
@@ -647,6 +721,16 @@ label {
     border-radius: 9px;
 }
 
+.site-footer {
+    padding: 18px 24px 24px;
+    color: var(--muted);
+    background: var(--background);
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    letter-spacing: 0.15px;
+    text-align: center;
+}
+
 @media (max-width: 850px) {
     .sidebar {
         width: 78px;
@@ -694,8 +778,12 @@ label {
         padding: 0 18px;
     }
 
-    .topbar-account span {
+    .topbar-user-meta > span:first-child {
         display: none;
+    }
+
+    .topbar-security-status {
+        margin-right: 0;
     }
 
     .main-content {
@@ -1217,21 +1305,6 @@ label {
 /* =================================
    CHECKING + SAVINGS ACCOUNTS
 ================================= */
-
-.accounts-balance-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    margin-bottom: 24px;
-}
-
-.savings-account-card {
-    background: linear-gradient(
-        135deg,
-        #143a2d,
-        #1f7a55
-    );
-}
 
 .account-balance-card p {
     color: rgba(255, 255, 255, 0.72);

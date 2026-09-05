@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Audit logs | MiniBank{% endblock %}
+{% block content %}
+<section class="professional-panel">
+    <h1>Searchable audit logs</h1>
+    <form method="get"><input name="q" value="{{ search }}" placeholder="Search details"><input name="action" value="{{ action }}" placeholder="Action"><button type="submit">Search</button></form>
+    {% for log in logs %}
+    <div class="row"><span>{{ log.created_at|sgt }} · {{ log.action }} · @{{ log.actor.username }}</span><small>{{ log.details }}</small></div>
+    {% else %}<p>No matching audit events.</p>{% endfor %}
+</section>
+{% endblock %}

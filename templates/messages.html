@@ -9,13 +9,13 @@ Messages | MiniBank
 <div class="page-heading">
     <div>
         <p class="page-label">
-            PRIVATE MESSAGING
+            MESSAGING
         </p>
 
         <h1>Messages</h1>
 
         <p>
-            Message another MiniBank demo account.
+            Message another account or join a group chat.
         </p>
     </div>
 </div>
@@ -87,6 +87,40 @@ Messages | MiniBank
 
     {% endif %}
 
+</section>
+
+<section class="professional-panel">
+    <div class="panel-header">
+        <div>
+            <h2>Group chats</h2>
+            <p>Create a shared conversation and manage its enabled members.</p>
+        </div>
+    </div>
+
+    <form action="{{ url_for('groups') }}" method="post" class="professional-form">
+        <div class="form-group">
+            <label for="group-name">New group name</label>
+            <input id="group-name" name="name" maxlength="120" required>
+        </div>
+        <button class="button" type="submit">Create group</button>
+    </form>
+
+    {% if groups %}
+    <div class="message-user-list">
+        {% for group in groups %}
+        <a href="{{ url_for('group_chat', group_id=group.id) }}" class="message-user">
+            <div class="message-avatar">#</div>
+            <div class="message-user-info">
+                <strong>{{ group.name }}</strong>
+                <span>Owner: @{{ group.creator.username }}</span>
+            </div>
+            <div class="message-arrow">→</div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>You are not a member of any group chats.</p>
+    {% endif %}
 </section>
 
 {% endblock %}

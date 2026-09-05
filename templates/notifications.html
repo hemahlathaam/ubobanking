@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Notifications | MiniBank{% endblock %}
+{% block content %}
+<section class="professional-panel">
+    <h1>Notifications</h1>
+    {% for notification in notifications %}
+    <div class="row"><strong>{{ notification.title }}</strong><span>{{ notification.body }}<br><small>{{ notification.created_at|sgt }}</small></span></div>
+    {% else %}<p>No notifications.</p>{% endfor %}
+</section>
+{% endblock %}

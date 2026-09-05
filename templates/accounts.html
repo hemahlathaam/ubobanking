@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}
+Checking account | MiniBank
+{% endblock %}
+
+{% block content %}
+
+<div class="page-heading">
+    <div>
+        <p class="page-label">ACCOUNT</p>
+        <h1>Your checking account</h1>
+        <p>One clear demo checking balance for transfers and simulated payments.</p>
+    </div>
+</div>
+
+<section class="account-balance-card">
+    <span class="balance-label">AVAILABLE CHECKING BALANCE</span>
+    <h2>{{ current_user.balance|money }}</h2>
+    <p>Available for transfers to other MiniBank users.</p>
+</section>
+
+<section class="professional-panel">
+    <div class="panel-header">
+        <div>
+            <h2>Account status</h2>
+            <p>Your demo checking account is the only account type supported.</p>
+        </div>
+        <span class="account-status">ACTIVE</span>
+    </div>
+    <p class="demo-security-box">DEMO SYSTEM · No real funds or external bank accounts are connected.</p>
+</section>
+
+{% endblock %}

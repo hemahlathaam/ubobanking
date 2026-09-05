@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_role_badges.html" import role_badges %}
 
 {% block title %}
 Profile | MiniBank
@@ -74,15 +75,11 @@ Profile | MiniBank
             <div class="profile-detail-row">
 
                 <span>
-                    ACCOUNT TYPE
+                    ACCOUNT ROLES
                 </span>
 
                 <strong>
-                    {% if current_user.is_admin %}
-                        Administrator
-                    {% else %}
-                        Demo Account
-                    {% endif %}
+                    {{ role_badges(current_user) }}
                 </strong>
 
             </div>

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Bill pay | MiniBank{% endblock %}
+{% block content %}
+<section class="professional-panel">
+    <h1>Demo bill payment</h1>
+    <form method="post" class="professional-form"><input name="payee" placeholder="Payee" required><input name="amount" type="number" min="0.01" step="0.01" required><input name="reference" placeholder="Reference"><button class="button" type="submit">Pay bill</button></form>
+    {% for payment in payments %}<div class="row"><span>{{ payment.created_at|sgt }} · {{ payment.payee }} · {{ payment.reference }}</span><strong>{{ payment.amount|money }}</strong></div>{% else %}<p>No bill payments.</p>{% endfor %}
+</section>
+{% endblock %}

@@ -31,10 +31,13 @@
             "/accounts",
             "/transactions",
             "/messages",
-            "/admin"
+            "/admin",
+            "/notifications",
+            "/statements"
         ];
 
         const isChatPage = page.startsWith("/messages/");
+        const isGroupPage = page.startsWith("/groups/");
 
         const shouldReload =
             reloadPages.includes(page) ||
@@ -42,9 +45,14 @@
                 isChatPage &&
                 (
                     update.type === "new_message" ||
-                    update.type === "message_sent"
-                )
-            );
+                        update.type === "message_sent" ||
+                        update.type === "new_group_message"
+                    )
+                ||
+                (
+                    isGroupPage &&
+                    update.type === "new_group_message"
+                );
 
         if (!shouldReload) {
             return;

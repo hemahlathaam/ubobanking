@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Statements | MiniBank{% endblock %}
+{% block content %}
+<section class="professional-panel">
+    <h1>Statements</h1>
+    <p><a class="button" href="{{ url_for('statement_csv') }}">Download CSV</a> <a class="button" href="{{ url_for('statement_pdf') }}">PDF export (CSV fallback)</a></p>
+    {% for transaction in transactions %}
+    <div class="row"><span>#{{ transaction.id }} {{ transaction.created_at|sgt }} · {{ transaction.status }}</span><strong>{{ transaction.amount|money }}</strong></div>
+    {% else %}<p>No transactions.</p>{% endfor %}
+</section>
+{% endblock %}

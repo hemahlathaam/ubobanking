@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Ticket #{{ ticket.id }} | MiniBank{% endblock %}
+{% block content %}
+<section class="professional-panel">
+    <h1>#{{ ticket.id }} {{ ticket.subject }}</h1><p>{{ ticket.description }}</p><p>Status: {{ ticket.status }}</p>
+    {% if current_user.has_permission("support_manage") %}
+    <form method="post"><select name="status"><option value="open">Open</option><option value="answered">Answered</option><option value="closed">Closed</option></select><button type="submit">Update status</button></form>
+    {% endif %}
+    {% for reply in replies %}<div class="row"><span>{{ reply.created_at|sgt }}</span><p>{{ reply.content }}</p></div>{% endfor %}
+    <form method="post"><textarea name="content" required></textarea><button type="submit">Reply</button></form>
+</section>
+{% endblock %}

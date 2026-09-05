@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Management balances | MiniBank{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+    <p class="page-label">MANAGEMENT VIEW</p>
+    <h1>Account balances</h1>
+    <p>Read-only checking balances for enabled and disabled demo accounts.</p>
+</div>
+
+<section class="professional-panel">
+    <div class="panel-header">
+        <div>
+            <h2>Customer checking balances</h2>
+            <p>Access is restricted to authorized management roles and this view is audited.</p>
+        </div>
+        <a href="{{ url_for('admin_panel') }}">Back to administration</a>
+    </div>
+    <div class="transaction-list">
+        {% for user in users %}
+        <div class="professional-transaction">
+            <div class="transaction-main">
+                <div class="transaction-direction {% if user.is_enabled %}received-icon{% else %}sent-icon{% endif %}">
+                    {{ user.display_name[0]|upper }}
+                </div>
+                <div>
+                    <strong>{{ user.display_name }} · @{{ user.username }}</strong>
+                    <p>{{ "Enabled" if user.is_enabled else "Disabled" }} · {{ user.roles|join(", ")|title if user.roles else "Standard" }}</p>
+                </div>
+            </div>
+            <div>
+                <strong>Checking {{ user.balance|money }}</strong>
+            </div>
+        </div>
+        {% else %}
+        <p>No accounts found.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

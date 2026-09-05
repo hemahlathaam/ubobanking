@@ -40,7 +40,7 @@
         <div class="receipt-row">
             <span>Time</span>
             <strong>
-                {{ transaction.created_at.strftime("%d %B %Y %H:%M") }}
+                {{ transaction.created_at|sgt }}
             </strong>
         </div>
 

@@ -182,7 +182,20 @@ Transactions | MiniBank
 
                         {% endif %}
 
+                        <small class="transaction-reference">
+                            Reference: TXN-{{ "%08d"|format(transaction.id) }}
+                            · {{ transaction.created_at|sgt }}
+                        </small>
+
                     </div>
+
+                    {% if transaction.status != "completed" %}
+                    <small>{{ transaction.status|capitalize }}</small>
+                    {% elif transaction.sender_id == current_user.id %}
+                    <form method="post" action="{{ url_for('cancel_transfer', transaction_id=transaction.id) }}">
+                        <button type="submit">Cancel (5 min)</button>
+                    </form>
+                    {% endif %}
 
                 </div>
 

@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.env
+.env.*
+instance/*.db
+*.db
+local_demo.db
+verification.db
+missing-*-check.db
+.pytest_cache/
+.coverage

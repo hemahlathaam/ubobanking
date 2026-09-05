@@ -37,6 +37,7 @@ Transfer | MiniBank
                 <p>
                     Enter the recipient and transfer amount.
                 </p>
+                <p><a href="{{ url_for('beneficiaries') }}">Manage beneficiaries</a> · <a href="{{ url_for('scheduled_transfers') }}">Schedule a transfer</a></p>
             </div>
 
         </div>
@@ -45,9 +46,23 @@ Transfer | MiniBank
         <form method="post" class="professional-form">
 
             <div class="form-group">
+                <label for="beneficiary_id">
+                    Saved beneficiary (optional)
+                </label>
+                <select id="beneficiary_id" name="beneficiary_id">
+                    <option value="">Choose a saved beneficiary</option>
+                    {% for item in beneficiaries %}
+                    <option value="{{ item.id }}">
+                        {{ item.nickname }} · @{{ item.beneficiary.username }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
 
                 <label for="receiver_username">
-                    Recipient username
+                    Recipient username (if no beneficiary is selected)
                 </label>
 
                 <div class="input-prefix-wrapper">
@@ -58,7 +73,6 @@ Transfer | MiniBank
                         id="receiver_username"
                         name="receiver_username"
                         placeholder="username"
-                        required
                     >
 
                 </div>

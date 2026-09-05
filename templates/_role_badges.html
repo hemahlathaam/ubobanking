@@ -1,0 +1,31 @@
+{% macro role_badges(user) -%}
+<span class="role-badges" aria-label="Roles for {{ user.display_name }}">
+    {% if "admin" in user.roles %}
+    <span
+        class="role-badge role-badge-admin"
+        title="Admin role — winged Patron emblem; management access"
+    >
+        <span class="role-badge-mark" aria-hidden="true">༺♛༻</span>
+        <span>Admin</span>
+    </span>
+    {% endif %}
+    {% if "developer" in user.roles %}
+    <span
+        class="role-badge role-badge-developer"
+        title="Developer role — management access"
+    >
+        <span class="role-badge-mark" aria-hidden="true">&lt;/&gt;</span>
+        <span>Developer</span>
+    </span>
+    {% endif %}
+    {% if not user.roles %}
+    <span
+        class="role-badge role-badge-standard"
+        title="Standard banking role"
+    >
+        <span class="role-badge-mark" aria-hidden="true">•</span>
+        <span>Standard</span>
+    </span>
+    {% endif %}
+</span>
+{%- endmacro %}
