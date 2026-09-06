@@ -25,6 +25,106 @@ body {
     color: var(--text);
 }
 
+.developer-console {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 28px;
+    background: #fff;
+    color: #000;
+    font-family: "Courier New", Courier, monospace;
+    border: 2px solid #000;
+}
+
+.developer-console-header,
+.developer-console-row,
+.developer-console-grid {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.developer-console-header {
+    align-items: flex-start;
+    border-bottom: 2px solid #000;
+    padding-bottom: 16px;
+}
+
+.developer-console h1,
+.developer-console h2,
+.developer-console p {
+    margin-top: 0;
+}
+
+.developer-console h1 {
+    font-size: 28px;
+    margin-bottom: 0;
+}
+
+.developer-console h2 {
+    font-size: 16px;
+    border-bottom: 1px dotted #000;
+    padding-bottom: 8px;
+}
+
+.developer-console-note {
+    padding: 12px 0;
+}
+
+.developer-console-block {
+    border: 1px solid #000;
+    padding: 16px;
+    margin-top: 16px;
+}
+
+.developer-console-grid {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+.developer-console-grid span {
+    min-width: 210px;
+}
+
+.developer-console-row {
+    align-items: center;
+    border-bottom: 1px dotted #000;
+    padding: 9px 0;
+}
+
+.developer-console-row:last-child {
+    border-bottom: 0;
+}
+
+.developer-console a,
+.developer-console-button {
+    color: #000;
+    background: #fff;
+    border: 1px solid #000;
+    font-family: inherit;
+    padding: 6px 10px;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.developer-console a:hover,
+.developer-console-button:hover {
+    color: #fff;
+    background: #000;
+}
+
+.developer-console-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 0;
+}
+
+.developer-console-input {
+    border: 1px solid #000;
+    padding: 7px;
+    font-family: inherit;
+}
+
 button,
 input {
     font: inherit;

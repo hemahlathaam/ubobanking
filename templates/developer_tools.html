@@ -1,68 +1,78 @@
 {% extends "base.html" %}
 {% block title %}Developer tools | MiniBank{% endblock %}
 {% block content %}
-<section class="page-header">
-    <p class="eyebrow">DEVELOPER-ONLY</p>
-    <h1>Developer tools</h1>
-    <p class="muted">Sandbox operations and diagnostics are restricted to developer roles.</p>
-</section>
+<div class="developer-console">
+    <header class="developer-console-header">
+        <div>
+            <p>MINIBANK DEVELOPER CONSOLE // LOCAL DEMO</p>
+            <h1>root@minibank:~$</h1>
+        </div>
+        <span>ACCESS: DEVELOPER</span>
+    </header>
+    <p class="developer-console-note">Type-safe operations only. Every mutation is audited.</p>
 
-<div class="dashboard-grid">
-    <section class="card">
-        <h2>System health</h2>
-        <p>Database: <strong>{{ health.database }}</strong></p>
-        <p>Users: <strong>{{ health.users }}</strong></p>
-        <p>Transactions: <strong>{{ health.transactions }}</strong></p>
-        <p>Audit events: <strong>{{ health.audit_events }}</strong></p>
+    <section class="developer-console-block">
+        <h2>[01] STATUS</h2>
+        <div class="developer-console-grid">
+            <span>database ........ {{ health.database }}</span>
+            <span>users ............ {{ health.users }}</span>
+            <span>transactions ..... {{ health.transactions }}</span>
+            <span>audit events ..... {{ health.audit_events }}</span>
+        </div>
+        <p class="developer-console-links">
+            <a href="{{ url_for('admin_panel') }}">[admin panel]</a>
+            <a href="{{ url_for('audit_logs') }}">[audit logs]</a>
+            <a href="{{ url_for('management_balances') }}">[balances]</a>
+        </p>
     </section>
-    <section class="card">
-        <h2>Sandbox data</h2>
-        <p class="muted">Creates a standard demo user with a starting balance.</p>
+
+    <section class="developer-console-block">
+        <h2>[02] SANDBOX</h2>
+        <p>Create disposable users for testing transfers, chats, and permissions.</p>
         <form method="post">
             <input type="hidden" name="action" value="create_sandbox_user">
-            <button class="button" type="submit">Create sandbox user</button>
+            <button class="developer-console-button" type="submit">[ generate sandbox user ]</button>
         </form>
     </section>
-</div>
 
-<section class="card">
-    <h2>Feature flags</h2>
+    <section class="developer-console-block">
+        <h2>[03] FEATURE FLAGS</h2>
     {% for name, flag in flags.items() %}
-    <form method="post" class="inline-form">
+    <form method="post" class="developer-console-row">
         <input type="hidden" name="action" value="toggle_flag">
         <input type="hidden" name="flag_name" value="{{ name }}">
-        <strong>{{ name }}</strong>
-        <span class="muted">{{ "Enabled" if flag and flag.enabled else "Disabled" }}</span>
-        <button class="button secondary" type="submit">Toggle</button>
+        <span>{{ name }} :: {{ "ON" if flag and flag.enabled else "OFF" }}</span>
+        <button class="developer-console-button" type="submit">[ toggle ]</button>
     </form>
     {% endfor %}
-</section>
+    </section>
 
-<section class="card">
-    <h2>API keys</h2>
-    <form method="post" class="inline-form">
+    <section class="developer-console-block">
+    <h2>[04] API KEYS</h2>
+    <form method="post" class="developer-console-row">
         <input type="hidden" name="action" value="create_api_key">
-        <input name="name" placeholder="Key name" required maxlength="80">
-        <button class="button" type="submit">Create key</button>
+        <input class="developer-console-input" name="name" placeholder="key-name" required maxlength="80">
+        <button class="developer-console-button" type="submit">[ create ]</button>
     </form>
     {% for key in api_keys %}
-    <div class="list-row">
-        <span><strong>{{ key.name }}</strong> · {{ key.key_prefix }}…</span>
+    <div class="developer-console-row">
+        <span>{{ key.name }} :: {{ key.key_prefix }}…</span>
         {% if key.is_active %}
         <form method="post">
             <input type="hidden" name="action" value="revoke_api_key">
             <input type="hidden" name="key_id" value="{{ key.id }}">
-            <button class="button danger" type="submit">Revoke</button>
+            <button class="developer-console-button" type="submit">[ revoke ]</button>
         </form>
-        {% else %}<span class="muted">Revoked</span>{% endif %}
+        {% else %}<span>REVOKED</span>{% endif %}
     </div>
-    {% else %}<p class="muted">No API keys created.</p>{% endfor %}
-</section>
+    {% else %}<p>No API keys created.</p>{% endfor %}
+    </section>
 
-<section class="card">
-    <h2>Recent activity</h2>
+    <section class="developer-console-block">
+    <h2>[05] ACTIVITY STREAM</h2>
     {% for log in recent_logs %}
-    <div class="list-row"><span>{{ log.action }}</span><span class="muted">{{ log.created_at|sgt }}</span></div>
-    {% else %}<p class="muted">No audit activity yet.</p>{% endfor %}
-</section>
+    <div class="developer-console-row"><span>{{ log.action }}</span><span>{{ log.created_at|sgt }}</span></div>
+    {% else %}<p>No audit activity yet.</p>{% endfor %}
+    </section>
+</div>
 {% endblock %}
