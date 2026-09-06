@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Developer tools | MiniBank{% endblock %}
+{% block content %}
+<section class="page-header">
+    <p class="eyebrow">DEVELOPER-ONLY</p>
+    <h1>Developer tools</h1>
+    <p class="muted">Sandbox operations and diagnostics are restricted to developer roles.</p>
+</section>
+
+<div class="dashboard-grid">
+    <section class="card">
+        <h2>System health</h2>
+        <p>Database: <strong>{{ health.database }}</strong></p>
+        <p>Users: <strong>{{ health.users }}</strong></p>
+        <p>Transactions: <strong>{{ health.transactions }}</strong></p>
+        <p>Audit events: <strong>{{ health.audit_events }}</strong></p>
+    </section>
+    <section class="card">
+        <h2>Sandbox data</h2>
+        <p class="muted">Creates a standard demo user with a starting balance.</p>
+        <form method="post">
+            <input type="hidden" name="action" value="create_sandbox_user">
+            <button class="button" type="submit">Create sandbox user</button>
+        </form>
+    </section>
+</div>
+
+<section class="card">
+    <h2>Feature flags</h2>
+    {% for name, flag in flags.items() %}
+    <form method="post" class="inline-form">
+        <input type="hidden" name="action" value="toggle_flag">
+        <input type="hidden" name="flag_name" value="{{ name }}">
+        <strong>{{ name }}</strong>
+        <span class="muted">{{ "Enabled" if flag and flag.enabled else "Disabled" }}</span>
+        <button class="button secondary" type="submit">Toggle</button>
+    </form>
+    {% endfor %}
+</section>
+
+<section class="card">
+    <h2>API keys</h2>
+    <form method="post" class="inline-form">
+        <input type="hidden" name="action" value="create_api_key">
+        <input name="name" placeholder="Key name" required maxlength="80">
+        <button class="button" type="submit">Create key</button>
+    </form>
+    {% for key in api_keys %}
+    <div class="list-row">
+        <span><strong>{{ key.name }}</strong> · {{ key.key_prefix }}…</span>
+        {% if key.is_active %}
+        <form method="post">
+            <input type="hidden" name="action" value="revoke_api_key">
+            <input type="hidden" name="key_id" value="{{ key.id }}">
+            <button class="button danger" type="submit">Revoke</button>
+        </form>
+        {% else %}<span class="muted">Revoked</span>{% endif %}
+    </div>
+    {% else %}<p class="muted">No API keys created.</p>{% endfor %}
+</section>
+
+<section class="card">
+    <h2>Recent activity</h2>
+    {% for log in recent_logs %}
+    <div class="list-row"><span>{{ log.action }}</span><span class="muted">{{ log.created_at|sgt }}</span></div>
+    {% else %}<p class="muted">No audit activity yet.</p>{% endfor %}
+</section>
+{% endblock %}

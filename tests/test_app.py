@@ -31,6 +31,7 @@ from app import (
     CheckDeposit,
     UserRole,
     UserPermission,
+    DeveloperApiKey,
     format_singapore_time,
     parse_datetime,
 )
@@ -101,6 +102,27 @@ class MiniBankSmokeTests(unittest.TestCase):
         self.assertIn(b"Checking account", accounts.data)
         self.assertNotIn(b"Savings", accounts.data)
         self.assertEqual(self.client.get("/accounts/move-money").status_code, 404)
+
+    def test_developer_tools_are_developer_only(self):
+        self.login("admin", "StrongPass123")
+        self.assertEqual(self.client.get("/developer-tools").status_code, 403)
+        self.create_user("developer", account_type="developer")
+        self.client.post("/logout")
+        with app.app_context():
+            developer = User.query.filter_by(username="developer").one()
+            db.session.commit()
+        self.login("developer", "Password123")
+        page = self.client.get("/developer-tools")
+        self.assertEqual(page.status_code, 200)
+        self.assertIn(b"Developer tools", page.data)
+        response = self.client.post(
+            "/developer-tools",
+            data={"action": "create_api_key", "name": "Local test"},
+            follow_redirects=True,
+        )
+        self.assertIn(b"Copy this API key now", response.data)
+        with app.app_context():
+            self.assertEqual(DeveloperApiKey.query.count(), 1)
 
     def test_management_role_can_create_user_and_transfer(self):
         self.login("admin", "StrongPass123")

@@ -129,6 +129,12 @@
             </a>
 
             {% endif %}
+            {% if "developer" in current_user.roles and not impersonator %}
+            <a href="{{ url_for('developer_tools') }}" class="sidebar-link">
+                <span>&lt;/&gt;</span>
+                <span class="sidebar-link-text">Developer tools</span>
+            </a>
+            {% endif %}
 
         </nav>
 
