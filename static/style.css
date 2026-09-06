@@ -85,6 +85,24 @@ body {
     min-width: 210px;
 }
 
+.developer-console-directory {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.developer-console-directory div {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    border-left: 1px solid #000;
+    padding-left: 12px;
+}
+
+.developer-console-directory strong {
+    margin-bottom: 3px;
+}
+
 .developer-console-row {
     align-items: center;
     border-bottom: 1px dotted #000;
@@ -123,6 +141,12 @@ body {
     border: 1px solid #000;
     padding: 7px;
     font-family: inherit;
+}
+
+@media (max-width: 700px) {
+    .developer-console-directory {
+        grid-template-columns: 1fr;
+    }
 }
 
 button,

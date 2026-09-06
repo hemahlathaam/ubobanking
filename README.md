@@ -72,7 +72,8 @@ approved roadmap:
 - developer-only tools for system health, sandbox user generation, feature
   flags, scoped API keys, and recent audit activity;
 - the developer console uses a compact black-and-white terminal-style
-  interface with quick links to operational views;
+  interface with a complete legacy-portal directory for every active banking
+  module;
 
 No feature sends money, email, SMS, or card transactions to an external
 provider. Scheduled transfers are processed when the owner visits the

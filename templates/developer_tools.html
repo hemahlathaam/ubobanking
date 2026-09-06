@@ -27,7 +27,40 @@
     </section>
 
     <section class="developer-console-block">
-        <h2>[02] SANDBOX</h2>
+        <h2>[02] LEGACY PORTAL DIRECTORY</h2>
+        <p>Developer-only access to every active banking module.</p>
+        <div class="developer-console-directory">
+            <div>
+                <strong>ACCOUNTS</strong>
+                <a href="{{ url_for('dashboard') }}">[ dashboard ]</a>
+                <a href="{{ url_for('accounts') }}">[ accounts ]</a>
+                <a href="{{ url_for('profile') }}">[ profile ]</a>
+                <a href="{{ url_for('statements') }}">[ statements ]</a>
+            </div>
+            <div>
+                <strong>MONEY MOVEMENT</strong>
+                <a href="{{ url_for('transfer') }}">[ transfer funds ]</a>
+                <a href="{{ url_for('transactions') }}">[ transactions ]</a>
+                <a href="{{ url_for('beneficiaries') }}">[ beneficiaries ]</a>
+                <a href="{{ url_for('scheduled_transfers') }}">[ scheduled transfers ]</a>
+            </div>
+            <div>
+                <strong>MESSAGING</strong>
+                <a href="{{ url_for('messages') }}">[ direct messages ]</a>
+                <a href="{{ url_for('groups') }}">[ group chats ]</a>
+                <a href="{{ url_for('notifications') }}">[ notifications ]</a>
+            </div>
+            <div>
+                <strong>MANAGEMENT</strong>
+                <a href="{{ url_for('admin_panel') }}">[ user management ]</a>
+                <a href="{{ url_for('management_balances') }}">[ balance viewer ]</a>
+                <a href="{{ url_for('audit_logs') }}">[ audit logs ]</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="developer-console-block">
+        <h2>[03] SANDBOX</h2>
         <p>Create disposable users for testing transfers, chats, and permissions.</p>
         <form method="post">
             <input type="hidden" name="action" value="create_sandbox_user">
@@ -36,7 +69,7 @@
     </section>
 
     <section class="developer-console-block">
-        <h2>[03] FEATURE FLAGS</h2>
+        <h2>[04] FEATURE FLAGS</h2>
     {% for name, flag in flags.items() %}
     <form method="post" class="developer-console-row">
         <input type="hidden" name="action" value="toggle_flag">
@@ -48,7 +81,7 @@
     </section>
 
     <section class="developer-console-block">
-    <h2>[04] API KEYS</h2>
+    <h2>[05] API KEYS</h2>
     <form method="post" class="developer-console-row">
         <input type="hidden" name="action" value="create_api_key">
         <input class="developer-console-input" name="name" placeholder="key-name" required maxlength="80">
@@ -69,7 +102,7 @@
     </section>
 
     <section class="developer-console-block">
-    <h2>[05] ACTIVITY STREAM</h2>
+    <h2>[06] ACTIVITY STREAM</h2>
     {% for log in recent_logs %}
     <div class="developer-console-row"><span>{{ log.action }}</span><span>{{ log.created_at|sgt }}</span></div>
     {% else %}<p>No audit activity yet.</p>{% endfor %}
