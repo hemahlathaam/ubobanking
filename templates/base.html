@@ -10,7 +10,7 @@
     >
 
     <title>
-        {% block title %}MiniBank Demo{% endblock %}
+        {% block title %}RUBO - Republic of United Boys Organization{% endblock %}
     </title>
 
     <link
@@ -28,11 +28,11 @@
     <aside class="sidebar">
 
         <div class="sidebar-logo">
-            <div class="logo-icon">M</div>
+            <div class="logo-icon">⚡</div>
 
             <div>
-                <strong>MiniBank</strong>
-                <span>Demo Banking</span>
+                <strong>RUBO</strong>
+                <span>Smart Banking</span>
             </div>
         </div>
 
@@ -187,7 +187,7 @@
         <header class="topbar">
 
             <p class="topbar-demo">
-                DEMO BANK — NO REAL MONEY · {{ display_timezone }}
+                RUBO BANKING — SECURE & RELIABLE · {{ display_timezone }}
             </p>
 
             {% if impersonator %}
@@ -204,7 +204,7 @@
 
                 <div class="topbar-security-status">
                     <span class="status-dot"></span>
-                    <span>Account active · Demo session</span>
+                    <span>Account active · RUBO Session</span>
                 </div>
 
                 {% if current_profile and current_profile.profile_image_url %}
@@ -277,7 +277,7 @@
 
 {% endif %}
 
-<footer class="site-footer">Copyright Pranav Hemahlathaa Harish and Hari Suhanth Karthikeyan, 2026.</footer>
+<footer class="site-footer">RUBO - Republic of United Boys Organization | Copyright © 2026. All rights reserved.</footer>
 
 <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 <script src="{{ url_for('static', filename='realtime.js') }}"></script>
