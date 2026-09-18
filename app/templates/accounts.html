@@ -1,8 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}
-Checking account | MiniBank
-{% endblock %}
+{% block title %}Checking account — {{ org.name }}{% endblock %}
 
 {% block content %}
 
@@ -17,7 +15,7 @@ Checking account | MiniBank
 <section class="account-balance-card">
     <span class="balance-label">AVAILABLE CHECKING BALANCE</span>
     <h2>{{ current_user.balance|money }}</h2>
-    <p>Available for transfers to other MiniBank users.</p>
+    <p>Available for transfers to other {{ org.name }} users.</p>
 </section>
 
 <section class="professional-panel">
