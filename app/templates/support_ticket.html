@@ -49,4 +49,30 @@
         <div>
             <h2>Conversation</h2>
             <p>{{ replies|length }} repl{{ "y" if replies|length == 1 else "ies" }}.</p>
-        </div
+        </div>
+    </div>
+
+    {% for reply in replies %}
+    <div class="row">
+        <div>
+            <strong>@{{ reply.author_id }}</strong>
+            <p>{{ reply.content }}</p>
+        </div>
+        <small>{{ reply.created_at|sgt }}</small>
+    </div>
+    {% else %}
+    <p>No replies yet.</p>
+    {% endfor %}
+
+    <form method="post" class="professional-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+            <label for="content">Reply</label>
+            <textarea id="content" name="content" required></textarea>
+        </div>
+        <button class="primary-bank-button" type="submit">Reply</button>
+    </form>
+
+</section>
+
+{% endblock %}
