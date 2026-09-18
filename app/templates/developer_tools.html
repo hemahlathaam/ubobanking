@@ -1,14 +1,19 @@
 {% extends "base.html" %}
-{% block title %}Developer tools | MiniBank{% endblock %}
+
+{% block title %}Developer tools — {{ org.name }}{% endblock %}
+
 {% block content %}
+
 <div class="developer-console">
+
     <header class="developer-console-header">
         <div>
-            <p>MINIBANK DEVELOPER CONSOLE // LOCAL DEMO</p>
-            <h1>root@minibank:~$</h1>
+            <p>{{ org.name }} DEVELOPER CONSOLE // LOCAL DEMO</p>
+            <h1>root@{{ org.slug }}:~$</h1>
         </div>
         <span>ACCESS: DEVELOPER</span>
     </header>
+
     <p class="developer-console-note">Type-safe operations only. Every mutation is audited.</p>
 
     <section class="developer-console-block">
@@ -20,9 +25,9 @@
             <span>audit events ..... {{ health.audit_events }}</span>
         </div>
         <p class="developer-console-links">
-            <a href="{{ url_for('admin_panel') }}">[admin panel]</a>
-            <a href="{{ url_for('audit_logs') }}">[audit logs]</a>
-            <a href="{{ url_for('management_balances') }}">[balances]</a>
+            <a href="{{ url_for('admin.admin_panel') }}">[admin panel]</a>
+            <a href="{{ url_for('admin.audit_logs') }}">[audit logs]</a>
+            <a href="{{ url_for('admin.management_balances') }}">[balances]</a>
         </p>
     </section>
 
@@ -32,29 +37,29 @@
         <div class="developer-console-directory">
             <div>
                 <strong>ACCOUNTS</strong>
-                <a href="{{ url_for('dashboard') }}">[ dashboard ]</a>
-                <a href="{{ url_for('accounts') }}">[ accounts ]</a>
-                <a href="{{ url_for('profile') }}">[ profile ]</a>
-                <a href="{{ url_for('statements') }}">[ statements ]</a>
+                <a href="{{ url_for('dashboard.dashboard') }}">[ dashboard ]</a>
+                <a href="{{ url_for('dashboard.accounts') }}">[ accounts ]</a>
+                <a href="{{ url_for('dashboard.profile') }}">[ profile ]</a>
+                <a href="{{ url_for('dashboard.statements') }}">[ statements ]</a>
             </div>
             <div>
                 <strong>MONEY MOVEMENT</strong>
-                <a href="{{ url_for('transfer') }}">[ transfer funds ]</a>
-                <a href="{{ url_for('transactions') }}">[ transactions ]</a>
-                <a href="{{ url_for('beneficiaries') }}">[ beneficiaries ]</a>
-                <a href="{{ url_for('scheduled_transfers') }}">[ scheduled transfers ]</a>
+                <a href="{{ url_for('transfers.transfer') }}">[ transfer funds ]</a>
+                <a href="{{ url_for('dashboard.transactions') }}">[ transactions ]</a>
+                <a href="{{ url_for('transfers.beneficiaries') }}">[ beneficiaries ]</a>
+                <a href="{{ url_for('transfers.scheduled_transfers') }}">[ scheduled transfers ]</a>
             </div>
             <div>
                 <strong>MESSAGING</strong>
-                <a href="{{ url_for('messages') }}">[ direct messages ]</a>
-                <a href="{{ url_for('groups') }}">[ group chats ]</a>
-                <a href="{{ url_for('notifications') }}">[ notifications ]</a>
+                <a href="{{ url_for('chat.messages') }}">[ direct messages ]</a>
+                <a href="{{ url_for('chat.groups') }}">[ group chats ]</a>
+                <a href="{{ url_for('chat.notifications') }}">[ notifications ]</a>
             </div>
             <div>
                 <strong>MANAGEMENT</strong>
-                <a href="{{ url_for('admin_panel') }}">[ user management ]</a>
-                <a href="{{ url_for('management_balances') }}">[ balance viewer ]</a>
-                <a href="{{ url_for('audit_logs') }}">[ audit logs ]</a>
+                <a href="{{ url_for('admin.admin_panel') }}">[ user management ]</a>
+                <a href="{{ url_for('admin.management_balances') }}">[ balance viewer ]</a>
+                <a href="{{ url_for('admin.audit_logs') }}">[ audit logs ]</a>
             </div>
         </div>
     </section>
@@ -63,6 +68,7 @@
         <h2>[03] SANDBOX</h2>
         <p>Create disposable users for testing transfers, chats, and permissions.</p>
         <form method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="action" value="create_sandbox_user">
             <button class="developer-console-button" type="submit">[ generate sandbox user ]</button>
         </form>
@@ -70,42 +76,51 @@
 
     <section class="developer-console-block">
         <h2>[04] FEATURE FLAGS</h2>
-    {% for name, flag in flags.items() %}
-    <form method="post" class="developer-console-row">
-        <input type="hidden" name="action" value="toggle_flag">
-        <input type="hidden" name="flag_name" value="{{ name }}">
-        <span>{{ name }} :: {{ "ON" if flag and flag.enabled else "OFF" }}</span>
-        <button class="developer-console-button" type="submit">[ toggle ]</button>
-    </form>
-    {% endfor %}
-    </section>
-
-    <section class="developer-console-block">
-    <h2>[05] API KEYS</h2>
-    <form method="post" class="developer-console-row">
-        <input type="hidden" name="action" value="create_api_key">
-        <input class="developer-console-input" name="name" placeholder="key-name" required maxlength="80">
-        <button class="developer-console-button" type="submit">[ create ]</button>
-    </form>
-    {% for key in api_keys %}
-    <div class="developer-console-row">
-        <span>{{ key.name }} :: {{ key.key_prefix }}…</span>
-        {% if key.is_active %}
-        <form method="post">
-            <input type="hidden" name="action" value="revoke_api_key">
-            <input type="hidden" name="key_id" value="{{ key.id }}">
-            <button class="developer-console-button" type="submit">[ revoke ]</button>
+        {% for name, flag in flags.items() %}
+        <form method="post" class="developer-console-row">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="toggle_flag">
+            <input type="hidden" name="flag_name" value="{{ name }}">
+            <span>{{ name }} :: {{ "ON" if flag and flag.enabled else "OFF" }}</span>
+            <button class="developer-console-button" type="submit">[ toggle ]</button>
         </form>
-        {% else %}<span>REVOKED</span>{% endif %}
-    </div>
-    {% else %}<p>No API keys created.</p>{% endfor %}
+        {% endfor %}
     </section>
 
     <section class="developer-console-block">
-    <h2>[06] ACTIVITY STREAM</h2>
-    {% for log in recent_logs %}
-    <div class="developer-console-row"><span>{{ log.action }}</span><span>{{ log.created_at|sgt }}</span></div>
-    {% else %}<p>No audit activity yet.</p>{% endfor %}
+        <h2>[05] API KEYS</h2>
+        <form method="post" class="developer-console-row">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="create_api_key">
+            <input class="developer-console-input" name="name" placeholder="key-name" required maxlength="80">
+            <button class="developer-console-button" type="submit">[ create ]</button>
+        </form>
+
+        {% for key in api_keys %}
+        <div class="developer-console-row">
+            <span>{{ key.name }} :: {{ key.key_prefix }}…</span>
+            {% if key.is_active %}
+            <form method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="action" value="revoke_api_key">
+                <input type="hidden" name="key_id" value="{{ key.id }}">
+                <button class="developer-console-button" type="submit">[ revoke ]</button>
+            </form>
+            {% else %}<span>REVOKED</span>{% endif %}
+        </div>
+        {% else %}<p>No API keys created.</p>{% endfor %}
     </section>
+
+    <section class="developer-console-block">
+        <h2>[06] ACTIVITY STREAM</h2>
+        {% for log in recent_logs %}
+        <div class="developer-console-row">
+            <span>{{ log.action }}</span>
+            <span>{{ log.created_at|sgt }}</span>
+        </div>
+        {% else %}<p>No audit activity yet.</p>{% endfor %}
+    </section>
+
 </div>
+
 {% endblock %}
