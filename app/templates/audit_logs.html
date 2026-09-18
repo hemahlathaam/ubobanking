@@ -1,11 +1,49 @@
 {% extends "base.html" %}
-{% block title %}Audit logs | MiniBank{% endblock %}
+
+{% block title %}Audit logs — {{ org.name }}{% endblock %}
+
 {% block content %}
+
+<div class="page-heading">
+    <div>
+        <p class="page-label">MANAGEMENT VIEW</p>
+        <h1>Audit logs</h1>
+        <p>Every management action is recorded here.</p>
+    </div>
+</div>
+
 <section class="professional-panel">
-    <h1>Searchable audit logs</h1>
-    <form method="get"><input name="q" value="{{ search }}" placeholder="Search details"><input name="action" value="{{ action }}" placeholder="Action"><button type="submit">Search</button></form>
-    {% for log in logs %}
-    <div class="row"><span>{{ log.created_at|sgt }} · {{ log.action }} · @{{ log.actor.username }}</span><small>{{ log.details }}</small></div>
-    {% else %}<p>No matching audit events.</p>{% endfor %}
+
+    <form method="get" class="transaction-search-form">
+        <div class="transaction-search-box">
+            <span>⌕</span>
+            <input name="q" value="{{ search }}" placeholder="Search details">
+        </div>
+        <input name="action" value="{{ action }}" placeholder="Filter by action">
+        <button type="submit" class="search-button">Search</button>
+    </form>
+
+    <div class="transaction-list">
+        {% for log in logs %}
+        <div class="professional-transaction">
+            <div class="transaction-main">
+                <div class="transaction-direction received-icon">⌗</div>
+                <div>
+                    <strong>{{ log.action }}</strong>
+                    <p>@{{ log.actor.username }} · {{ log.created_at|sgt }}</p>
+                    <small>{{ log.details }}</small>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="professional-empty">
+            <div class="empty-icon">⌗</div>
+            <h3>No matching audit events</h3>
+            <p>Try a different search.</p>
+        </div>
+        {% endfor %}
+    </div>
+
 </section>
+
 {% endblock %}
