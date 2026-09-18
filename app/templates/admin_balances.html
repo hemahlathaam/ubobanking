@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}Management balances | MiniBank{% endblock %}
+{% block title %}Management balances — {{ org.name }}{% endblock %}
 
 {% block content %}
+
 <div class="page-heading">
     <p class="page-label">MANAGEMENT VIEW</p>
     <h1>Account balances</h1>
@@ -15,8 +16,9 @@
             <h2>Customer checking balances</h2>
             <p>Access is restricted to authorized management roles and this view is audited.</p>
         </div>
-        <a href="{{ url_for('admin_panel') }}">Back to administration</a>
+        <a href="{{ url_for('admin.admin_panel') }}">Back to administration</a>
     </div>
+
     <div class="transaction-list">
         {% for user in users %}
         <div class="professional-transaction">
@@ -26,7 +28,10 @@
                 </div>
                 <div>
                     <strong>{{ user.display_name }} · @{{ user.username }}</strong>
-                    <p>{{ "Enabled" if user.is_enabled else "Disabled" }} · {{ user.roles|join(", ")|title if user.roles else "Standard" }}</p>
+                    <p>
+                        {{ "Enabled" if user.is_enabled else "Disabled" }} ·
+                        {{ user.roles|join(", ")|title if user.roles else "Standard" }}
+                    </p>
                 </div>
             </div>
             <div>
@@ -38,4 +43,5 @@
         {% endfor %}
     </div>
 </section>
+
 {% endblock %}
