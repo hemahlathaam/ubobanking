@@ -1,67 +1,81 @@
-(() => {
+/**
+ * RUBO × COB — Live update client
+ * Listens for `rubo_update` events from the server and reloads the page
+ * when the current route cares about that kind of update.
+ */
+
+(function () {
+    if (typeof io === "undefined") {
+        console.warn("Socket.IO client not loaded — live updates disabled.");
+        return;
+    }
+
     const socket = io({
-        transports: ["websocket", "polling"]
+        transports: ["websocket", "polling"],
     });
 
     let reloadTimer = null;
 
+    // Pages that should refresh on ANY relevant update
+    const RELOAD_PAGES = [
+        "/dashboard",
+        "/accounts",
+        "/transactions",
+        "/messages",
+        "/admin",
+        "/notifications",
+        "/statements",
+        "/groups",
+    ];
+
     socket.on("connect", () => {
-        console.log("MiniBank live connection working:", socket.id);
+        console.log("RUBO live connection established:", socket.id);
     });
 
     socket.on("connect_error", (error) => {
-        console.error("MiniBank Socket.IO error:", error.message);
+        console.error("RUBO Socket.IO error:", error.message);
     });
 
     socket.on("disconnect", (reason) => {
-        console.log("MiniBank disconnected:", reason);
+        console.log("RUBO disconnected:", reason);
     });
 
-    socket.on("minibank_update", (update) => {
-        console.log("MiniBank update received:", update);
+    socket.on("rubo_update", (update) => {
+        console.log("RUBO update received:", update);
 
         const page = window.location.pathname;
 
+        // Never auto-reload mid-transfer (user is filling a form)
         if (page === "/transfer") {
             return;
         }
 
-        const reloadPages = [
-            "/dashboard",
-            "/accounts",
-            "/transactions",
-            "/messages",
-            "/admin",
-            "/notifications",
-            "/statements"
+        const isDirectChat = page.startsWith("/messages/");
+        const isGroupChat = page.startsWith("/groups/");
+
+        // Direct/group chat pages only care about messages
+        const chatUpdateTypes = [
+            "new_message",
+            "message_sent",
+            "new_group_message",
         ];
 
-        const isChatPage = page.startsWith("/messages/");
-        const isGroupPage = page.startsWith("/groups/");
+        let shouldReload = false;
 
-        const shouldReload =
-            reloadPages.includes(page) ||
-            (
-                isChatPage &&
-                (
-                    update.type === "new_message" ||
-                        update.type === "message_sent" ||
-                        update.type === "new_group_message"
-                    )
-                ||
-                (
-                    isGroupPage &&
-                    update.type === "new_group_message"
-                );
+        if (RELOAD_PAGES.includes(page)) {
+            shouldReload = true;
+        } else if (isDirectChat || isGroupChat) {
+            shouldReload = chatUpdateTypes.includes(update.type);
+        }
 
         if (!shouldReload) {
             return;
         }
 
+        // Debounce so a burst of updates only triggers one reload
         clearTimeout(reloadTimer);
-
         reloadTimer = setTimeout(() => {
             window.location.reload();
-        }, 300);
+        }, 350);
     });
 })();
