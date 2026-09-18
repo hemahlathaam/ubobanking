@@ -1,1 +1,41 @@
-{% extends "base.html" %}{% block public_content %}<section class="card center"><p class="badge">DEMO ONLY — NO REAL MONEY</p><h1>Private MiniBank</h1><p>Check your demo balance and transfer demo money.</p><p class="muted">Displayed times: {{ display_timezone }}.</p><a class="button" href="{{ url_for('login') }}">Log in</a></section>{% endblock %}
+{% extends "base.html" %}
+
+{% block title %}{{ org.name }} — {{ org.full_name }}{% endblock %}
+
+{% block public_content %}
+
+<div class="landing-hero">
+
+    <div class="landing-orgs">
+        {% from "_logo.html" import org_logo %}
+        {% for o in all_orgs %}
+        <div class="landing-org-card" style="--card-accent: {{ o.accent }}; --card-ring: {{ o.ring }};">
+            {{ org_logo(o, size=72) }}
+            <strong>{{ o.name }}</strong>
+            <span>{{ o.full_name }}</span>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="landing-content">
+        <p class="badge">DEMO ONLY — NO REAL MONEY</p>
+        <h1>{{ org.name }} × {{ org.partner_slug|upper }}</h1>
+        <p class="landing-sub">
+            A private collaboration between
+            <strong>Republic of United Boys Organization</strong>
+            and
+            <strong>Civilisation of Boys</strong>.
+        </p>
+        <p class="landing-desc">
+            Check your demo balance, transfer demo money, and explore the
+            {{ org.name }} banking demo. All timestamps shown in {{ display_timezone }}.
+        </p>
+
+        <div class="landing-actions">
+            <a class="button primary-bank-button" href="{{ url_for('auth.login') }}">Log in</a>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
