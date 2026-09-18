@@ -1,7 +1,14 @@
 Flask>=3.1,<4
 Flask-Login>=0.6,<1
 Flask-SQLAlchemy>=3.1,<4
+Flask-WTF>=1.2,<2
+Flask-Limiter>=3.8,<4
+Flask-SocketIO>=5.4,<6
+Flask-Migrate>=4.0,<5
+python-dotenv>=1.0,<2
 gunicorn>=23,<24
+gevent>=24.2
+gevent-websocket>=0.10.1
 psycopg[binary]>=3.2,<4
-Flask-SocketIO
 simple-websocket
+WTForms>=3.1,<4
