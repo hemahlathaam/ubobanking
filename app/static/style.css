@@ -1044,4 +1044,167 @@ label { display: block; font-size: 12px; font-weight: 700; margin: 15px 0 7px; }
     max-width: 980px;
     margin: 0 auto;
     padding: 28px;
-   
+    background: var(--panel);
+    color: var(--text);
+    font-family: "Courier New", Courier, monospace;
+    border: 2px solid var(--text);
+    border-radius: 12px;
+}
+
+.developer-console-header,
+.developer-console-row,
+.developer-console-grid {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+
+.developer-console-header {
+    align-items: flex-start;
+    border-bottom: 2px solid var(--text);
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+}
+
+.developer-console h1, .developer-console h2, .developer-console p { margin-top: 0; }
+.developer-console h1 { font-size: 28px; margin-bottom: 0; }
+.developer-console h2 { font-size: 16px; border-bottom: 1px dotted var(--text); padding-bottom: 8px; }
+
+.developer-console-note { padding: 12px 0; }
+
+.developer-console-block {
+    border: 1px solid var(--text);
+    padding: 16px;
+    margin-top: 16px;
+    border-radius: 8px;
+}
+
+.developer-console-grid { justify-content: flex-start; }
+.developer-console-grid span { min-width: 210px; }
+
+.developer-console-directory {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.developer-console-directory div {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    border-left: 1px solid var(--text);
+    padding-left: 12px;
+}
+
+.developer-console-directory strong { margin-bottom: 3px; }
+
+.developer-console-row {
+    align-items: center;
+    border-bottom: 1px dotted var(--text);
+    padding: 9px 0;
+}
+
+.developer-console-row:last-child { border-bottom: 0; }
+
+.developer-console a,
+.developer-console-button {
+    color: var(--text);
+    background: var(--panel);
+    border: 1px solid var(--text);
+    font-family: inherit;
+    padding: 6px 10px;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.developer-console a:hover,
+.developer-console-button:hover {
+    color: var(--panel);
+    background: var(--text);
+}
+
+.developer-console-links { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 0; }
+
+.developer-console-input {
+    border: 1px solid var(--text);
+    padding: 7px;
+    font-family: inherit;
+    background: var(--panel);
+    color: var(--text);
+}
+
+/* ---------- Error pages ---------- */
+
+.error-page {
+    max-width: 500px;
+    margin: 80px auto;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.error-code {
+    font-size: 90px;
+    font-weight: 900;
+    color: var(--primary);
+    line-height: 1;
+    margin-bottom: 20px;
+    letter-spacing: -4px;
+}
+
+.error-page h1 { font-size: 28px; margin: 0 0 12px; }
+.error-page p { color: var(--muted); margin-bottom: 30px; }
+
+/* ---------- Statement actions ---------- */
+
+.statement-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+
+@media (max-width: 1000px) {
+    .landing-hero { grid-template-columns: 1fr; }
+    .transfer-layout { grid-template-columns: 1fr; }
+    .profile-layout { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 850px) {
+    .sidebar {
+        width: 78px;
+        padding: 25px 12px;
+    }
+
+    .sidebar-logo div:not(.org-logo) { display: none; }
+    .sidebar-link { font-size: 0; justify-content: center; padding: 12px; }
+    .sidebar-link span:first-child { font-size: 19px; width: auto; }
+    .sidebar-user div:not(.avatar) { display: none; }
+    .logout-button, .theme-toggle, .nav-title, .org-switcher { display: none; }
+
+    .main-area { margin-left: 78px; width: calc(100% - 78px); }
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .developer-console-directory { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+    .sidebar { display: none; }
+    .main-area { margin-left: 0; width: 100%; }
+    .topbar { padding: 0 18px; height: auto; min-height: 60px; flex-wrap: wrap; padding-top: 12px; padding-bottom: 12px; }
+    .topbar-demo { font-size: 10px; }
+    .topbar-security-status { margin-right: 0; }
+    .main-content { padding: 25px 18px; }
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .balance-card-bottom { grid-template-columns: 1fr; }
+    .account-balance-card h2 { font-size: 34px; }
+    .professional-transaction { gap: 14px; align-items: flex-start; }
+    .row { flex-direction: column; }
+    .admin-user-actions { flex-direction: column; }
+    .admin-user-actions form { flex-direction: column; }
+    .transaction-search-form { flex-direction: column; align-items: stretch; }
+    .search-button { width: 100%; }
+    .receipt-buttons { grid-template-columns: 1fr; }
+}
