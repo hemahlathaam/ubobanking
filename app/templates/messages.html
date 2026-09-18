@@ -1,22 +1,14 @@
 {% extends "base.html" %}
 
-{% block title %}
-Messages | MiniBank
-{% endblock %}
+{% block title %}Messages — {{ org.name }}{% endblock %}
 
 {% block content %}
 
 <div class="page-heading">
     <div>
-        <p class="page-label">
-            MESSAGING
-        </p>
-
+        <p class="page-label">MESSAGING</p>
         <h1>Messages</h1>
-
-        <p>
-            Message another account or join a group chat.
-        </p>
+        <p>Message another account or join a group chat.</p>
     </div>
 </div>
 
@@ -25,71 +17,35 @@ Messages | MiniBank
     <div class="panel-header">
         <div>
             <h2>Accounts</h2>
-
-            <p>
-                Select a person to start messaging.
-            </p>
+            <p>Select a person to start messaging.</p>
         </div>
     </div>
 
     {% if users %}
-
-    <div class="message-user-list">
-
-        {% for user in users %}
-
-        <a
-            href="{{ url_for('chat', user_id=user.id) }}"
-            class="message-user"
-        >
-
-            <div class="message-avatar">
-                {{ user.display_name[0]|upper }}
-            </div>
-
-            <div class="message-user-info">
-
-                <strong>
-                    {{ user.display_name }}
-                </strong>
-
-                <span>
-                    @{{ user.username }}
-                </span>
-
-            </div>
-
-            <div class="message-arrow">
-                →
-            </div>
-
-        </a>
-
-        {% endfor %}
-
-    </div>
-
-    {% else %}
-
-    <div class="professional-empty">
-
-        <div class="empty-icon">
-            ✉
+        <div class="message-user-list">
+            {% for user in users %}
+            <a href="{{ url_for('chat.chat', user_id=user.id) }}" class="message-user">
+                <div class="message-avatar">{{ user.display_name[0]|upper }}</div>
+                <div class="message-user-info">
+                    <strong>{{ user.display_name }}</strong>
+                    <span>@{{ user.username }}</span>
+                </div>
+                <div class="message-arrow">→</div>
+            </a>
+            {% endfor %}
         </div>
-
-        <h3>No accounts available</h3>
-
-        <p>
-            There are no other enabled accounts.
-        </p>
-
-    </div>
-
+    {% else %}
+        <div class="professional-empty">
+            <div class="empty-icon">✉</div>
+            <h3>No accounts available</h3>
+            <p>There are no other enabled accounts.</p>
+        </div>
     {% endif %}
 
 </section>
 
 <section class="professional-panel">
+
     <div class="panel-header">
         <div>
             <h2>Group chats</h2>
@@ -97,30 +53,32 @@ Messages | MiniBank
         </div>
     </div>
 
-    <form action="{{ url_for('groups') }}" method="post" class="professional-form">
+    <form action="{{ url_for('chat.groups') }}" method="post" class="professional-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="form-group">
             <label for="group-name">New group name</label>
             <input id="group-name" name="name" maxlength="120" required>
         </div>
-        <button class="button" type="submit">Create group</button>
+        <button class="primary-bank-button" type="submit">Create group</button>
     </form>
 
     {% if groups %}
-    <div class="message-user-list">
-        {% for group in groups %}
-        <a href="{{ url_for('group_chat', group_id=group.id) }}" class="message-user">
-            <div class="message-avatar">#</div>
-            <div class="message-user-info">
-                <strong>{{ group.name }}</strong>
-                <span>Owner: @{{ group.creator.username }}</span>
-            </div>
-            <div class="message-arrow">→</div>
-        </a>
-        {% endfor %}
-    </div>
+        <div class="message-user-list">
+            {% for group in groups %}
+            <a href="{{ url_for('chat.group_chat', group_id=group.id) }}" class="message-user">
+                <div class="message-avatar">#</div>
+                <div class="message-user-info">
+                    <strong>{{ group.name }}</strong>
+                    <span>Owner: @{{ group.creator.username }}</span>
+                </div>
+                <div class="message-arrow">→</div>
+            </a>
+            {% endfor %}
+        </div>
     {% else %}
-    <p>You are not a member of any group chats.</p>
+        <p>You are not a member of any group chats.</p>
     {% endif %}
+
 </section>
 
 {% endblock %}
