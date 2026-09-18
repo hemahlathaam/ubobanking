@@ -1,11 +1,75 @@
 {% extends "base.html" %}
-{% block title %}Statements | MiniBank{% endblock %}
+
+{% block title %}Statements — {{ org.name }}{% endblock %}
+
 {% block content %}
+
+<div class="page-heading">
+    <div>
+        <p class="page-label">STATEMENTS</p>
+        <h1>Account statements</h1>
+        <p>Download your demo account activity as CSV.</p>
+    </div>
+</div>
+
 <section class="professional-panel">
-    <h1>Statements</h1>
-    <p><a class="button" href="{{ url_for('statement_csv') }}">Download CSV</a> <a class="button" href="{{ url_for('statement_pdf') }}">PDF export (CSV fallback)</a></p>
-    {% for transaction in transactions %}
-    <div class="row"><span>#{{ transaction.id }} {{ transaction.created_at|sgt }} · {{ transaction.status }}</span><strong>{{ transaction.amount|money }}</strong></div>
-    {% else %}<p>No transactions.</p>{% endfor %}
+
+    <div class="panel-header">
+        <div>
+            <h2>Export</h2>
+            <p>All times are shown in {{ display_timezone }}.</p>
+        </div>
+
+        <div class="statement-actions">
+            <a class="primary-bank-button" href="{{ url_for('dashboard.statement_csv') }}">Download CSV</a>
+            <a class="button" href="{{ url_for('dashboard.statement_pdf') }}">PDF export (CSV fallback)</a>
+        </div>
+    </div>
+
+    {% if transactions %}
+        <div class="transaction-list">
+            {% for transaction in transactions %}
+            <div class="professional-transaction">
+
+                <div class="transaction-main">
+                    <div class="
+                        transaction-direction
+                        {% if transaction.sender_id == current_user.id %}sent-icon{% else %}received-icon{% endif %}
+                    ">
+                        {% if transaction.sender_id == current_user.id %}↗{% else %}↙{% endif %}
+                    </div>
+
+                    <div>
+                        <strong>#{{ transaction.id }} · {{ transaction.status|capitalize }}</strong>
+                        <p>{{ transaction.created_at|sgt }}</p>
+                        {% if transaction.note %}
+                            <small>{{ transaction.note }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="
+                    transaction-amount
+                    {% if transaction.sender_id == current_user.id %}amount-sent{% else %}amount-received{% endif %}
+                ">
+                    {% if transaction.sender_id == current_user.id %}
+                        -{{ transaction.amount|money }}
+                    {% else %}
+                        +{{ transaction.amount|money }}
+                    {% endif %}
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="professional-empty">
+            <div class="empty-icon">▤</div>
+            <h3>No transactions</h3>
+            <p>Your account activity will appear here.</p>
+        </div>
+    {% endif %}
+
 </section>
+
 {% endblock %}
