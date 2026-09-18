@@ -1,21 +1,113 @@
 {% extends "base.html" %}
-{% block title %}Scheduled transfers | MiniBank{% endblock %}
+
+{% block title %}Scheduled transfers — {{ org.name }}{% endblock %}
+
 {% block content %}
-<section class="professional-panel">
-    <h1>Scheduled and recurring transfers</h1>
-    <form method="post" class="professional-form">
-        <input name="receiver_username" placeholder="Recipient username" required>
-        <input name="amount" type="number" min="0.01" step="0.01" placeholder="Amount" required>
-        <label for="next-run-at">Next run ({{ display_timezone }})</label>
-        <input id="next-run-at" name="next_run_at" type="datetime-local">
-        <input name="interval_days" type="number" min="0" placeholder="Repeat every N days (optional)">
-        <input name="note" maxlength="200" placeholder="Note">
-        <button class="button" type="submit">Schedule transfer</button>
-    </form>
-    {% for schedule in schedules %}
-    <div class="row"><span>{{ schedule.amount|money }} to @{{ schedule.receiver.username }} · next {{ schedule.next_run_at|sgt }} · {% if schedule.active %}active{% else %}cancelled{% endif %}</span>
-        {% if schedule.active %}<form method="post" action="{{ url_for('cancel_scheduled_transfer', schedule_id=schedule.id) }}"><button type="submit">Cancel</button></form>{% endif %}
+
+<div class="page-heading">
+    <div>
+        <p class="page-label">SCHEDULED</p>
+        <h1>Scheduled &amp; recurring transfers</h1>
+        <p>Queue future transfers or repeat them on a schedule.</p>
     </div>
-    {% else %}<p>No scheduled transfers.</p>{% endfor %}
+</div>
+
+<section class="professional-panel">
+
+    <div class="panel-header">
+        <div>
+            <h2>Create a scheduled transfer</h2>
+            <p>Times are entered in {{ display_timezone }}.</p>
+        </div>
+    </div>
+
+    <form method="post" class="professional-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group">
+            <label for="receiver_username">Recipient username</label>
+            <input id="receiver_username" name="receiver_username" placeholder="username" required>
+        </div>
+
+        <div class="form-group">
+            <label for="amount">Amount</label>
+            <input id="amount" name="amount" type="number" min="0.01" step="0.01"
+                   placeholder="0.00" required>
+        </div>
+
+        <div class="form-group">
+            <label for="next_run_at">Next run ({{ display_timezone }})</label>
+            <input id="next_run_at" name="next_run_at" type="datetime-local">
+        </div>
+
+        <div class="form-group">
+            <label for="interval_days">Repeat every N days (optional)</label>
+            <input id="interval_days" name="interval_days" type="number" min="0"
+                   placeholder="Leave blank for one-time">
+        </div>
+
+        <div class="form-group">
+            <label for="note">Note</label>
+            <input id="note" name="note" maxlength="200" placeholder="Optional note">
+        </div>
+
+        <button class="primary-bank-button" type="submit">Schedule transfer</button>
+    </form>
+
 </section>
+
+<section class="professional-panel">
+
+    <div class="panel-header">
+        <div>
+            <h2>Your schedules</h2>
+            <p>{{ schedules|length }} scheduled transfer(s).</p>
+        </div>
+    </div>
+
+    {% if schedules %}
+        <div class="transaction-list">
+            {% for schedule in schedules %}
+            <div class="professional-transaction">
+
+                <div class="transaction-main">
+                    <div class="transaction-direction received-icon">◷</div>
+                    <div>
+                        <strong>{{ schedule.amount|money }} to @{{ schedule.receiver.username }}</strong>
+                        <p>Next: {{ schedule.next_run_at|sgt }}</p>
+                        <small>
+                            {% if schedule.interval_days %}
+                                Repeats every {{ schedule.interval_days }} day(s)
+                            {% else %}
+                                One-time
+                            {% endif %}
+                            · {% if schedule.active %}Active{% else %}Cancelled{% endif %}
+                        </small>
+                        {% if schedule.note %}
+                            <small>{{ schedule.note }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if schedule.active %}
+                <form method="post"
+                      action="{{ url_for('transfers.cancel_scheduled_transfer', schedule_id=schedule.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="danger-button">Cancel</button>
+                </form>
+                {% endif %}
+
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="professional-empty">
+            <div class="empty-icon">◷</div>
+            <h3>No scheduled transfers</h3>
+            <p>Create one above to get started.</p>
+        </div>
+    {% endif %}
+
+</section>
+
 {% endblock %}
