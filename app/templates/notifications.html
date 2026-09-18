@@ -1,10 +1,56 @@
 {% extends "base.html" %}
-{% block title %}Notifications | MiniBank{% endblock %}
+
+{% block title %}Notifications — {{ org.name }}{% endblock %}
+
 {% block content %}
+
+<div class="page-heading">
+    <div>
+        <p class="page-label">INBOX</p>
+        <h1>Notifications</h1>
+        <p>Your latest account and security updates.</p>
+    </div>
+</div>
+
 <section class="professional-panel">
-    <h1>Notifications</h1>
-    {% for notification in notifications %}
-    <div class="row"><strong>{{ notification.title }}</strong><span>{{ notification.body }}<br><small>{{ notification.created_at|sgt }}</small></span></div>
-    {% else %}<p>No notifications.</p>{% endfor %}
+
+    <div class="panel-header">
+        <div>
+            <h2>All notifications</h2>
+            <p>{{ notifications|length }} notification(s).</p>
+        </div>
+        <a href="{{ url_for('chat.notification_preferences') }}">Preferences</a>
+    </div>
+
+    {% if notifications %}
+        <div class="transaction-list">
+            {% for notification in notifications %}
+            <div class="professional-transaction">
+
+                <div class="transaction-main">
+                    <div class="transaction-direction received-icon">!</div>
+                    <div>
+                        <strong>{{ notification.title }}</strong>
+                        <p>{{ notification.body }}</p>
+                        <small>{{ notification.created_at|sgt }}</small>
+                    </div>
+                </div>
+
+                {% if not notification.is_read %}
+                <span class="account-status">NEW</span>
+                {% endif %}
+
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="professional-empty">
+            <div class="empty-icon">!</div>
+            <h3>No notifications</h3>
+            <p>You'll see account alerts here.</p>
+        </div>
+    {% endif %}
+
 </section>
+
 {% endblock %}
