@@ -1,213 +1,97 @@
 {% extends "base.html" %}
 {% from "_role_badges.html" import role_badges %}
 
-{% block title %}
-Profile | MiniBank
-{% endblock %}
+{% block title %}Profile — {{ org.name }}{% endblock %}
 
 {% block content %}
 
 <div class="page-heading">
     <div>
-        <p class="page-label">
-            ACCOUNT PROFILE
-        </p>
-
-        <h1>
-            Your profile
-        </h1>
-
-        <p>
-            Manage your public display information.
-        </p>
+        <p class="page-label">ACCOUNT PROFILE</p>
+        <h1>Your profile</h1>
+        <p>Manage your public display information.</p>
     </div>
 </div>
-
 
 <div class="profile-layout">
 
     <section class="professional-panel profile-summary-card">
 
         <div class="profile-large-avatar">
-
             {% if user_profile.profile_image_url %}
-
-                <img
-                    src="{{ user_profile.profile_image_url }}"
-                    alt="Profile picture"
-                >
-
+                <img src="{{ user_profile.profile_image_url }}" alt="Profile picture">
             {% else %}
-
-                <span>
-                    {{ current_user.display_name[0]|upper }}
-                </span>
-
+                <span>{{ current_user.display_name[0]|upper }}</span>
             {% endif %}
-
         </div>
 
-
-        <h2>
-            {{ current_user.display_name }}
-        </h2>
-
-        <p class="profile-username">
-            @{{ current_user.username }}
-        </p>
-
+        <h2>{{ current_user.display_name }}</h2>
+        <p class="profile-username">@{{ current_user.username }}</p>
 
         <div class="profile-detail-list">
 
             <div class="profile-detail-row">
-
-                <span>
-                    DEMO ACCOUNT NUMBER
-                </span>
-
-                <strong>
-                    {{ user_profile.account_number }}
-                </strong>
-
+                <span>DEMO ACCOUNT NUMBER</span>
+                <strong>{{ user_profile.account_number }}</strong>
             </div>
 
-
             <div class="profile-detail-row">
-
-                <span>
-                    ACCOUNT ROLES
-                </span>
-
-                <strong>
-                    {{ role_badges(current_user) }}
-                </strong>
-
+                <span>ACCOUNT ROLES</span>
+                <strong>{{ role_badges(current_user) }}</strong>
             </div>
 
-
             <div class="profile-detail-row">
-
-                <span>
-                    ACCOUNT STATUS
-                </span>
-
-                <strong class="profile-status-active">
-                    Active
-                </strong>
-
+                <span>ACCOUNT STATUS</span>
+                <strong class="profile-status-active">Active</strong>
             </div>
 
         </div>
 
     </section>
 
-
     <section class="professional-panel">
 
         <div class="panel-header">
-
             <div>
-                <h2>
-                    Edit profile
-                </h2>
-
-                <p>
-                    You can update your display name and profile picture.
-                </p>
+                <h2>Edit profile</h2>
+                <p>You can update your display name and profile picture.</p>
             </div>
-
         </div>
 
-
-        <form
-            method="post"
-            class="professional-form"
-        >
+        <form method="post" class="professional-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
             <div class="form-group">
-
-                <label for="display_name">
-                    Display name
-                </label>
-
-                <input
-                    id="display_name"
-                    name="display_name"
-                    maxlength="120"
-                    value="{{ current_user.display_name }}"
-                    required
-                >
-
+                <label for="display_name">Display name</label>
+                <input id="display_name" name="display_name" maxlength="120"
+                       value="{{ current_user.display_name }}" required>
             </div>
-
 
             <div class="form-group">
-
-                <label for="profile_image_url">
-                    Profile picture URL
-                </label>
-
-                <input
-                    id="profile_image_url"
-                    name="profile_image_url"
-                    type="url"
-                    maxlength="1000"
-                    value="{{ user_profile.profile_image_url }}"
-                    placeholder="https://example.com/photo.jpg"
-                >
-
-                <p class="field-help">
-                    Paste a direct image URL beginning with http:// or https://.
-                </p>
-
+                <label for="profile_image_url">Profile picture URL</label>
+                <input id="profile_image_url" name="profile_image_url" type="url"
+                       maxlength="1000" value="{{ user_profile.profile_image_url }}"
+                       placeholder="https://example.com/photo.jpg">
+                <p class="field-help">Paste a direct image URL beginning with http:// or https://.</p>
             </div>
-
 
             <div class="profile-locked-setting">
-
                 <div>
-                    <strong>
-                        Username
-                    </strong>
-
-                    <p>
-                        @{{ current_user.username }}
-                    </p>
+                    <strong>Username</strong>
+                    <p>@{{ current_user.username }}</p>
                 </div>
-
-                <span>
-                    LOCKED
-                </span>
-
+                <span>LOCKED</span>
             </div>
-
 
             <div class="profile-locked-setting">
-
                 <div>
-                    <strong>
-                        Password
-                    </strong>
-
-                    <p>
-                        Only an administrator can reset account passwords.
-                    </p>
+                    <strong>Password</strong>
+                    <p>Only an administrator can reset account passwords.</p>
                 </div>
-
-                <span>
-                    ADMIN ONLY
-                </span>
-
+                <span>ADMIN ONLY</span>
             </div>
 
-
-            <button
-                type="submit"
-                class="primary-bank-button"
-            >
-                Save profile
-            </button>
-
+            <button type="submit" class="primary-bank-button">Save profile</button>
         </form>
 
     </section>
