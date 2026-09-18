@@ -82,6 +82,26 @@ def generate_account_number():
             return number
 
 
+# ---------- User roles ----------
+
+def apply_user_roles(user, roles):
+    """Persist composable management roles and legacy compatibility fields."""
+    from .models import UserRole
+    selected = {role for role in roles if role in {"admin", "developer"}}
+    UserRole.query.filter_by(user_id=user.id).delete(synchronize_session=False)
+    for role in sorted(selected):
+        db.session.add(UserRole(user_id=user.id, role=role))
+    if "admin" in selected:
+        user.account_type = "admin"
+        user.is_admin = True
+    elif "developer" in selected:
+        user.account_type = "developer"
+        user.is_admin = False
+    else:
+        user.account_type = "standard"
+        user.is_admin = False
+
+
 # ---------- Impersonation ----------
 
 def is_impersonating():
