@@ -1,0 +1,87 @@
+/* =========================================================
+   RUBO × COB — Dark mode overrides
+   Only applies when <html data-theme="dark">
+   ========================================================= */
+
+html[data-theme="dark"] {
+    --navy: #050a1a;
+    --navy-light: #0f1a36;
+    --background: #0c1220;
+    --panel: #131a2b;
+    --text: #e6ebf5;
+    --muted: #97a3b8;
+    --border: #222c44;
+    --green-bg: #0d3320;
+    --red-bg: #3a1414;
+    --topbar-bg: #131a2b;
+}
+
+html[data-theme="dark"] body {
+    background: var(--background);
+    color: var(--text);
+}
+
+html[data-theme="dark"] .account-balance-card {
+    box-shadow: 0 22px 45px rgba(0, 0, 0, 0.55);
+}
+
+html[data-theme="dark"] .topbar-demo {
+    color: var(--gold);
+    background: rgba(224, 177, 58, 0.15);
+}
+
+html[data-theme="dark"] .professional-action-card:hover {
+    box-shadow: 0 10px 30px rgba(49, 94, 251, 0.2);
+}
+
+html[data-theme="dark"] .flash.warning {
+    background: rgba(224, 177, 58, 0.15);
+    color: var(--gold);
+}
+
+html[data-theme="dark"] .badge {
+    background: rgba(224, 177, 58, 0.15);
+    color: var(--gold);
+}
+
+html[data-theme="dark"] .role-badge-admin {
+    color: #ffdb78;
+    background: rgba(255, 219, 120, 0.12);
+    border-color: rgba(255, 219, 120, 0.3);
+}
+
+html[data-theme="dark"] .role-badge-developer {
+    color: #a8c5ff;
+    background: rgba(168, 197, 255, 0.12);
+    border-color: rgba(168, 197, 255, 0.3);
+}
+
+html[data-theme="dark"] .role-badge-standard {
+    color: #b0bccd;
+    background: rgba(176, 188, 205, 0.1);
+    border-color: rgba(176, 188, 205, 0.25);
+}
+
+html[data-theme="dark"] .login-card {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+html[data-theme="dark"] .landing-org-card {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+html[data-theme="dark"] .receipt-card {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+html[data-theme="dark"] .chat-messages {
+    background: #0a1020;
+}
+
+html[data-theme="dark"] .developer-console {
+    background: #0a1020;
+}
+
+html[data-theme="dark"] .sidebar-profile-image img {
+    opacity: 0.9;
+}
