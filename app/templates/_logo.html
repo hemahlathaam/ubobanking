@@ -1,0 +1,45 @@
+{# SVG logo macro. Circle + centered rectangle + org text inside. #}
+{% macro org_logo(org, size=48) %}
+<svg
+    class="org-logo"
+    width="{{ size }}"
+    height="{{ size }}"
+    viewBox="0 0 64 64"
+    role="img"
+    aria-label="{{ org.name }} logo"
+>
+    <circle
+        cx="32" cy="32" r="30"
+        fill="none"
+        stroke="{{ org.ring }}"
+        stroke-width="3"
+    />
+    <circle cx="32" cy="32" r="26" fill="{{ org.accent }}" />
+    <rect
+        x="14" y="25"
+        width="36" height="14"
+        rx="3"
+        fill="#ffffff"
+    />
+    <text
+        x="32" y="36"
+        text-anchor="middle"
+        font-family="Inter, Arial, sans-serif"
+        font-size="10"
+        font-weight="800"
+        fill="{{ org.accent_dark }}"
+        letter-spacing="0.5"
+    >{{ org.name }}</text>
+</svg>
+{% endmacro %}
+
+
+{% macro org_pill(org, active_org_slug) %}
+<a
+    href="{{ url_for('brand.switch_org', slug=org.slug) }}"
+    class="org-pill {% if org.slug == active_org_slug %}org-pill-active{% endif %}"
+    style="--pill-accent: {{ org.accent }}; --pill-ring: {{ org.ring }};"
+>
+    {{ org.name }}
+</a>
+{% endmacro %}
