@@ -1,16 +1,31 @@
 {% extends "base.html" %}
 {% from "_role_badges.html" import role_badges %}
 
+{% block title %}Admin panel — {{ org.name }}{% endblock %}
+
 {% block content %}
 
-<section class="card">
-    <h1>Admin panel</h1>
-    <p>
-        <a href="{{ url_for('audit_logs') }}">Search audit logs</a> ·
-        <a href="{{ url_for('management_balances') }}">View checking balances</a>
-    </p>
+<div class="page-heading">
+    <div>
+        <p class="page-label">MANAGEMENT</p>
+        <h1>Admin panel</h1>
+        <p>Manage accounts, roles, permissions, and privileged operations.</p>
+    </div>
+</div>
 
-    <form action="{{ url_for('create_user') }}" method="post">
+<section class="card">
+    <h2>Quick links</h2>
+    <p>
+        <a href="{{ url_for('admin.audit_logs') }}">Search audit logs</a> ·
+        <a href="{{ url_for('admin.management_balances') }}">View checking balances</a>
+    </p>
+</section>
+
+<section class="card">
+    <h2>Create account</h2>
+
+    <form action="{{ url_for('admin.create_user') }}" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
         <label>Display name</label>
         <input name="display_name" required>
@@ -22,31 +37,23 @@
         <input name="password" type="password" minlength="8" required>
 
         <label>Starting balance</label>
-        <input
-            name="balance"
-            type="number"
-            min="0"
-            step="0.01"
-            value="1000.00"
-            required
-        >
+        <input name="balance" type="number" min="0" step="0.01" value="1000.00" required>
 
         <label>Composable roles (select either or both)</label>
         <label><input type="checkbox" name="role" value="developer"> Developer</label>
         <label><input type="checkbox" name="role" value="admin"> Admin</label>
         <input type="hidden" name="account_type" value="standard">
 
-        <button class="button" type="submit">
-            Create account
-        </button>
-
+        <button class="button" type="submit">Create account</button>
     </form>
 </section>
 
 <section class="card">
-    <h2>Privileged transfer</h2>
+    <h2>Privileged transfer (immediate)</h2>
     <p>Move funds between enabled accounts. Every transfer requires a reason and is audited.</p>
-    <form action="{{ url_for('admin_transfer') }}" method="post">
+
+    <form action="{{ url_for('admin.admin_transfer') }}" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label>Source username</label>
         <input name="source_username" required>
         <label>Recipient username</label>
@@ -62,22 +69,30 @@
 <section class="card">
     <h2>Transfer approvals</h2>
     <p>Use the approval form for a second-person review workflow.</p>
-    <form action="{{ url_for('request_privileged_transfer') }}" method="post">
+
+    <form action="{{ url_for('admin.request_privileged_transfer') }}" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input name="source_username" placeholder="Source username" required>
         <input name="receiver_username" placeholder="Recipient username" required>
         <input name="amount" type="number" min="0.01" step="0.01" required>
         <input name="reason" maxlength="200" placeholder="Reason" required>
         <button class="button" type="submit">Submit for approval</button>
     </form>
+
     {% for item in pending_transfer_requests %}
     <div class="row">
-        <span>#{{ item.id }} {{ item.source.username }} → {{ item.receiver.username }} · {{ item.amount|money }} · {{ item.reason }}</span>
+        <span>#{{ item.id }} {{ item.source.username }} → {{ item.receiver.username }} ·
+            {{ item.amount|money }} · {{ item.reason }}</span>
         <span>
             {% if current_user.has_permission("approve_transfer") %}
-            <form action="{{ url_for('approve_privileged_transfer_route', request_id=item.id) }}" method="post" style="display:inline">
+            <form action="{{ url_for('admin.approve_privileged_transfer_route', request_id=item.id) }}"
+                  method="post" style="display:inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit">Approve</button>
             </form>
-            <form action="{{ url_for('reject_privileged_transfer', request_id=item.id) }}" method="post" style="display:inline">
+            <form action="{{ url_for('admin.reject_privileged_transfer', request_id=item.id) }}"
+                  method="post" style="display:inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit">Reject</button>
             </form>
             {% else %}Awaiting an administrator{% endif %}
@@ -88,8 +103,10 @@
 
 <section class="card">
     <h2>Deposit demo check</h2>
-    <p>Post a local check from one enabled account to another. The writer is debited, the recipient is credited atomically, and the check details are audited.</p>
-    <form action="{{ url_for('deposit_demo_check') }}" method="post">
+    <p>Post a local check from one enabled account to another.</p>
+
+    <form action="{{ url_for('admin.deposit_demo_check') }}" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label>Check writer username</label>
         <input name="source_username" required>
         <label>Recipient username</label>
@@ -104,136 +121,93 @@
     </form>
 </section>
 
-
 <section class="card">
-
     <h2>Accounts</h2>
 
     {% for u in users %}
-
     <div class="row">
-
         <div>
-            <strong>
-                {{ u.display_name }} (@{{ u.username }})
-            </strong>
+            <strong>{{ u.display_name }} (@{{ u.username }})</strong>
             {{ role_badges(u) }}
-
             <p>
                 {{ u.balance|money }} ·
                 Roles: {% if u.roles %}{{ u.roles|join(", ")|title }}{% else %}Standard{% endif %}
-
-                {% if u.is_enabled %}
-                    · Enabled
-                {% else %}
-                    · Disabled
-                {% endif %}
+                {% if u.is_enabled %} · Enabled{% else %} · Disabled{% endif %}
             </p>
         </div>
 
-
         <div class="admin-user-actions">
 
-            <form action="{{ url_for('update_roles', user_id=u.id) }}" method="post">
+            <form action="{{ url_for('admin.update_roles', user_id=u.id) }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <label>Roles</label>
-                <label><input type="checkbox" name="role" value="developer" {% if "developer" in u.roles %}checked{% endif %}> Developer</label>
-                <label><input type="checkbox" name="role" value="admin" {% if "admin" in u.roles %}checked{% endif %}> Admin</label>
+                <label><input type="checkbox" name="role" value="developer"
+                    {% if "developer" in u.roles %}checked{% endif %}> Developer</label>
+                <label><input type="checkbox" name="role" value="admin"
+                    {% if "admin" in u.roles %}checked{% endif %}> Admin</label>
                 <button type="submit">Save roles</button>
             </form>
 
-            <form
-                action="{{ url_for('set_balance', user_id=u.id) }}"
-                method="post"
-            >
-                <input
-                    name="balance"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value="{{ '%.2f'|format(u.balance) }}"
-                    required
-                >
-
-                <button type="submit">
-                    Set balance
-                </button>
+            <form action="{{ url_for('admin.set_balance', user_id=u.id) }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input name="balance" type="number" min="0" step="0.01"
+                       value="{{ '%.2f'|format(u.balance) }}" required>
+                <button type="submit">Set balance</button>
             </form>
 
-
-            <form
-                action="{{ url_for('reset_password', user_id=u.id) }}"
-                method="post"
-            >
-                <input
-                    name="new_password"
-                    type="password"
-                    minlength="8"
-                    placeholder="New password"
-                    required
-                >
-
-                <button type="submit">
-                    Reset password
-                </button>
+            <form action="{{ url_for('admin.reset_password', user_id=u.id) }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input name="new_password" type="password" minlength="8"
+                       placeholder="New password" required>
+                <button type="submit">Reset password</button>
             </form>
 
             {% if u.id != current_user.id and u.is_enabled %}
-            <form action="{{ url_for('start_impersonation', user_id=u.id) }}" method="post">
+            <form action="{{ url_for('auth.start_impersonation', user_id=u.id) }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input name="reason" maxlength="200" placeholder="Impersonation reason" required>
                 <button type="submit">Impersonate</button>
             </form>
             {% endif %}
 
-            <form action="{{ url_for('update_permissions', user_id=u.id) }}" method="post">
-                <label><input type="checkbox" name="permission" value="balance_read" {% if "balance_read" in permission_map.get(u.id, []) %}checked{% endif %}> Balance view</label>
-                <label><input type="checkbox" name="permission" value="check_deposit" {% if "check_deposit" in permission_map.get(u.id, []) %}checked{% endif %}> Demo check deposit</label>
-                <label><input type="checkbox" name="permission" value="impersonate" {% if "impersonate" in permission_map.get(u.id, []) %}checked{% endif %}> Impersonate</label>
-                <label><input type="checkbox" name="permission" value="privileged_transfer" {% if "privileged_transfer" in permission_map.get(u.id, []) %}checked{% endif %}> Privileged transfers</label>
-                <label><input type="checkbox" name="permission" value="approve_transfer" {% if "approve_transfer" in permission_map.get(u.id, []) %}checked{% endif %}> Approve transfers</label>
-                <label><input type="checkbox" name="permission" value="audit_read" {% if "audit_read" in permission_map.get(u.id, []) %}checked{% endif %}> Audit logs</label>
-                <label><input type="checkbox" name="permission" value="support_manage" {% if "support_manage" in permission_map.get(u.id, []) %}checked{% endif %}> Support manager</label>
-                <label><input type="checkbox" name="permission" value="manage_groups" {% if "manage_groups" in permission_map.get(u.id, []) %}checked{% endif %}> Group manager</label>
+            <form action="{{ url_for('admin.update_permissions', user_id=u.id) }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <label><input type="checkbox" name="permission" value="balance_read"
+                    {% if "balance_read" in permission_map.get(u.id, []) %}checked{% endif %}> Balance view</label>
+                <label><input type="checkbox" name="permission" value="check_deposit"
+                    {% if "check_deposit" in permission_map.get(u.id, []) %}checked{% endif %}> Demo check deposit</label>
+                <label><input type="checkbox" name="permission" value="impersonate"
+                    {% if "impersonate" in permission_map.get(u.id, []) %}checked{% endif %}> Impersonate</label>
+                <label><input type="checkbox" name="permission" value="privileged_transfer"
+                    {% if "privileged_transfer" in permission_map.get(u.id, []) %}checked{% endif %}> Privileged transfers</label>
+                <label><input type="checkbox" name="permission" value="approve_transfer"
+                    {% if "approve_transfer" in permission_map.get(u.id, []) %}checked{% endif %}> Approve transfers</label>
+                <label><input type="checkbox" name="permission" value="audit_read"
+                    {% if "audit_read" in permission_map.get(u.id, []) %}checked{% endif %}> Audit logs</label>
+                <label><input type="checkbox" name="permission" value="support_manage"
+                    {% if "support_manage" in permission_map.get(u.id, []) %}checked{% endif %}> Support manager</label>
+                <label><input type="checkbox" name="permission" value="manage_groups"
+                    {% if "manage_groups" in permission_map.get(u.id, []) %}checked{% endif %}> Group manager</label>
                 <button type="submit">Save permissions</button>
             </form>
 
-
             {% if u.id != current_user.id %}
-
-            <form
-                action="{{ url_for('toggle_user', user_id=u.id) }}"
-                method="post"
-            >
+            <form action="{{ url_for('admin.toggle_user', user_id=u.id) }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit">
-
-                    {% if u.is_enabled %}
-                        Disable account
-                    {% else %}
-                        Enable account
-                    {% endif %}
-
+                    {% if u.is_enabled %}Disable account{% else %}Enable account{% endif %}
                 </button>
             </form>
 
-
-            <form
-                action="{{ url_for('delete_user', user_id=u.id) }}"
-                method="post"
-                onsubmit="return confirm('Are you sure you want to delete this account?');"
-            >
-                <button
-                    type="submit"
-                    class="danger-button"
-                >
-                    Delete account
-                </button>
+            <form action="{{ url_for('admin.delete_user', user_id=u.id) }}" method="post"
+                  onsubmit="return confirm('Are you sure you want to delete this account?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="danger-button">Delete account</button>
             </form>
-
             {% endif %}
 
         </div>
-
     </div>
-
     {% endfor %}
 
 </section>
