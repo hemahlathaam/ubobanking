@@ -1,12 +1,52 @@
 {% extends "base.html" %}
-{% block title %}Ticket #{{ ticket.id }} | MiniBank{% endblock %}
+
+{% block title %}Ticket #{{ ticket.id }} — {{ org.name }}{% endblock %}
+
 {% block content %}
+
+<div class="page-heading">
+    <div>
+        <p class="page-label">SUPPORT TICKET #{{ ticket.id }}</p>
+        <h1>{{ ticket.subject }}</h1>
+        <p>Status: {{ ticket.status|upper }} · {{ ticket.updated_at|sgt }}</p>
+    </div>
+</div>
+
 <section class="professional-panel">
-    <h1>#{{ ticket.id }} {{ ticket.subject }}</h1><p>{{ ticket.description }}</p><p>Status: {{ ticket.status }}</p>
-    {% if current_user.has_permission("support_manage") %}
-    <form method="post"><select name="status"><option value="open">Open</option><option value="answered">Answered</option><option value="closed">Closed</option></select><button type="submit">Update status</button></form>
-    {% endif %}
-    {% for reply in replies %}<div class="row"><span>{{ reply.created_at|sgt }}</span><p>{{ reply.content }}</p></div>{% endfor %}
-    <form method="post"><textarea name="content" required></textarea><button type="submit">Reply</button></form>
+
+    <div class="panel-header">
+        <div>
+            <h2>Original request</h2>
+            <p>By @{{ ticket.user.username }}</p>
+        </div>
+    </div>
+
+    <p>{{ ticket.description }}</p>
+
 </section>
-{% endblock %}
+
+{% if current_user.has_permission("support_manage") %}
+<section class="professional-panel">
+    <h2>Update status</h2>
+    <form method="post" class="professional-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" name="status">
+                <option value="open" {% if ticket.status == 'open' %}selected{% endif %}>Open</option>
+                <option value="answered" {% if ticket.status == 'answered' %}selected{% endif %}>Answered</option>
+                <option value="closed" {% if ticket.status == 'closed' %}selected{% endif %}>Closed</option>
+            </select>
+        </div>
+        <button class="primary-bank-button" type="submit">Update status</button>
+    </form>
+</section>
+{% endif %}
+
+<section class="professional-panel">
+
+    <div class="panel-header">
+        <div>
+            <h2>Conversation</h2>
+            <p>{{ replies|length }} repl{{ "y" if replies|length == 1 else "ies" }}.</p>
+        </div
