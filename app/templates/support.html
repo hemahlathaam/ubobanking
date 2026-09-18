@@ -1,9 +1,81 @@
 {% extends "base.html" %}
-{% block title %}Support | MiniBank{% endblock %}
+
+{% block title %}Support — {{ org.name }}{% endblock %}
+
 {% block content %}
+
+<div class="page-heading">
+    <div>
+        <p class="page-label">SUPPORT</p>
+        <h1>Support tickets</h1>
+        <p>Open a ticket if you need help with the demo.</p>
+    </div>
+</div>
+
 <section class="professional-panel">
-    <h1>Support tickets</h1>
-    <form method="post" class="professional-form"><input name="subject" maxlength="160" placeholder="Subject" required><textarea name="description" maxlength="5000" placeholder="Describe the issue" required></textarea><button class="button" type="submit">Open ticket</button></form>
-    {% for ticket in tickets %}<div class="row"><a href="{{ url_for('support_ticket', ticket_id=ticket.id) }}">#{{ ticket.id }} {{ ticket.subject }}</a><span>{{ ticket.status }}</span></div>{% else %}<p>No tickets.</p>{% endfor %}
+
+    <div class="panel-header">
+        <div>
+            <h2>Open a ticket</h2>
+            <p>Describe your issue and we'll get back to you.</p>
+        </div>
+    </div>
+
+    <form method="post" class="professional-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group">
+            <label for="subject">Subject</label>
+            <input id="subject" name="subject" maxlength="160" placeholder="Subject" required>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" maxlength="5000"
+                      placeholder="Describe the issue" required></textarea>
+        </div>
+
+        <button class="primary-bank-button" type="submit">Open ticket</button>
+    </form>
+
 </section>
+
+<section class="professional-panel">
+
+    <div class="panel-header">
+        <div>
+            <h2>Your tickets</h2>
+            <p>{{ tickets|length }} ticket(s).</p>
+        </div>
+    </div>
+
+    {% if tickets %}
+        <div class="transaction-list">
+            {% for ticket in tickets %}
+            <div class="professional-transaction">
+                <div class="transaction-main">
+                    <div class="transaction-direction received-icon">✦</div>
+                    <div>
+                        <strong>
+                            <a href="{{ url_for('support.support_ticket', ticket_id=ticket.id) }}">
+                                #{{ ticket.id }} {{ ticket.subject }}
+                            </a>
+                        </strong>
+                        <p>{{ ticket.updated_at|sgt }}</p>
+                    </div>
+                </div>
+                <span class="account-status">{{ ticket.status|upper }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="professional-empty">
+            <div class="empty-icon">✦</div>
+            <h3>No tickets</h3>
+            <p>Open one above if you need help.</p>
+        </div>
+    {% endif %}
+
+</section>
+
 {% endblock %}
