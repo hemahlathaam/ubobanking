@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: rubo-cob-bank
+    env: python
+    plan: free
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+    startCommand: gunicorn -c gunicorn.conf.py wsgi:app
+    healthCheckPath: /healthz
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: DEFAULT_ORG
+        value: rubo
+      - key: PYTHON_VERSION
+        value: "3.12.6"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rubo-db
+          property: connectionString
+
+databases:
+  - name: rubo-db
+    plan: free
+    databaseName: rubo
+    user: rubo
