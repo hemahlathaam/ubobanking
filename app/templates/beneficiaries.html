@@ -1,17 +1,85 @@
 {% extends "base.html" %}
-{% block title %}Beneficiaries | MiniBank{% endblock %}
+
+{% block title %}Beneficiaries — {{ org.name }}{% endblock %}
+
 {% block content %}
-<section class="professional-panel">
-    <h1>Beneficiaries</h1>
-    <form method="post" class="professional-form">
-        <input name="username" placeholder="Enabled username" required>
-        <input name="nickname" maxlength="80" placeholder="Nickname" required>
-        <button class="button" type="submit">Add beneficiary</button>
-    </form>
-    {% for item in beneficiaries %}
-    <div class="row"><span>{{ item.nickname }} (@{{ item.beneficiary.username }})</span>
-        <form method="post" action="{{ url_for('delete_beneficiary', beneficiary_id=item.id) }}"><button type="submit">Remove</button></form>
+
+<div class="page-heading">
+    <div>
+        <p class="page-label">BENEFICIARIES</p>
+        <h1>Saved beneficiaries</h1>
+        <p>Save accounts you transfer to often.</p>
     </div>
-    {% else %}<p>No beneficiaries yet.</p>{% endfor %}
+</div>
+
+<section class="professional-panel">
+
+    <div class="panel-header">
+        <div>
+            <h2>Add a beneficiary</h2>
+            <p>Choose an enabled account and give it a nickname.</p>
+        </div>
+    </div>
+
+    <form method="post" class="professional-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input id="username" name="username" placeholder="Enabled username" required>
+        </div>
+
+        <div class="form-group">
+            <label for="nickname">Nickname</label>
+            <input id="nickname" name="nickname" maxlength="80" placeholder="Nickname" required>
+        </div>
+
+        <button class="primary-bank-button" type="submit">Add beneficiary</button>
+    </form>
+
 </section>
+
+<section class="professional-panel">
+
+    <div class="panel-header">
+        <div>
+            <h2>Your saved beneficiaries</h2>
+            <p>{{ beneficiaries|length }} saved.</p>
+        </div>
+    </div>
+
+    {% if beneficiaries %}
+        <div class="transaction-list">
+            {% for item in beneficiaries %}
+            <div class="professional-transaction">
+
+                <div class="transaction-main">
+                    <div class="transaction-direction received-icon">
+                        {{ item.beneficiary.display_name[0]|upper }}
+                    </div>
+                    <div>
+                        <strong>{{ item.nickname }}</strong>
+                        <p>@{{ item.beneficiary.username }} · {{ item.beneficiary.display_name }}</p>
+                    </div>
+                </div>
+
+                <form method="post"
+                      action="{{ url_for('transfers.delete_beneficiary', beneficiary_id=item.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="danger-button">Remove</button>
+                </form>
+
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="professional-empty">
+            <div class="empty-icon">★</div>
+            <h3>No beneficiaries yet</h3>
+            <p>Add one above to speed up your transfers.</p>
+        </div>
+    {% endif %}
+
+</section>
+
 {% endblock %}
