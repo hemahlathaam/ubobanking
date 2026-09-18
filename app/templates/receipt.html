@@ -1,22 +1,20 @@
 {% extends "base.html" %}
 
-{% block title %}Transfer Receipt{% endblock %}
+{% block title %}Transfer Receipt — {{ org.name }}{% endblock %}
 
 {% block content %}
 
 <div class="page-heading">
     <div>
         <p class="page-label">TRANSFER RECEIPT</p>
-        <h1>Transfer Successful</h1>
+        <h1>Transfer successful</h1>
         <p>Your transfer has been completed.</p>
     </div>
 </div>
 
 <section class="receipt-card">
 
-    <div class="receipt-check">
-        ✓
-    </div>
+    <div class="receipt-check">✓</div>
 
     <h2>{{ transaction.amount|money }}</h2>
 
@@ -39,9 +37,7 @@
 
         <div class="receipt-row">
             <span>Time</span>
-            <strong>
-                {{ transaction.created_at|sgt }}
-            </strong>
+            <strong>{{ transaction.created_at|sgt }}</strong>
         </div>
 
         <div class="receipt-row">
@@ -52,21 +48,8 @@
     </div>
 
     <div class="receipt-buttons">
-
-        <a
-            href="{{ url_for('dashboard') }}"
-            class="receipt-secondary"
-        >
-            Dashboard
-        </a>
-
-        <a
-            href="{{ url_for('transactions') }}"
-            class="receipt-primary"
-        >
-            Transactions
-        </a>
-
+        <a href="{{ url_for('dashboard.dashboard') }}" class="receipt-secondary">Dashboard</a>
+        <a href="{{ url_for('dashboard.transactions') }}" class="receipt-primary">Transactions</a>
     </div>
 
 </section>
