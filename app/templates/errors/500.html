@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}500 — Server error{% endblock %}
+
+{% block public_content %}
+<div class="error-page">
+    <div class="error-code">500</div>
+    <h1>Something went wrong</h1>
+    <p>Our server hit an error. Please try again in a moment.</p>
+    <a class="button primary-bank-button" href="{{ url_for('auth.home') }}">Back to home</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="error-page">
+    <div class="error-code">500</div>
+    <h1>Something went wrong</h1>
+    <p>Our server hit an error. Please try again in a moment.</p>
+    <a class="button primary-bank-button" href="{{ url_for('dashboard.dashboard') }}">Back to dashboard</a>
+</div>
+{% endblock %}
