@@ -325,4 +325,362 @@ def delete_user(user_id):
         GroupMessageReaction.query.filter(GroupMessageReaction.group_message_id.in_(gm_ids)).delete(synchronize_session=False)
         MessageAttachment.query.filter(MessageAttachment.group_message_id.in_(gm_ids)).delete(synchronize_session=False)
         MessageMention.query.filter(MessageMention.group_message_id.in_(gm_ids)).delete(synchronize_session=False)
-        MessageReceipt.query.filter(MessageReceipt.group_message_id.in_(gm_ids)).delete
+        MessageReceipt.query.filter(MessageReceipt.group_message_id.in_(gm_ids)).delete(synchronize_session=False)
+
+    GroupMessage.query.filter_by(sender_id=user.id).delete(synchronize_session=False)
+    GroupReadState.query.filter_by(user_id=user.id).delete(synchronize_session=False)
+    GroupMembership.query.filter_by(user_id=user.id).delete(synchronize_session=False)
+
+    for group in GroupChat.query.filter_by(creator_id=user.id).all():
+        GroupMessage.query.filter_by(group_id=group.id).delete(synchronize_session=False)
+        GroupReadState.query.filter_by(group_id=group.id).delete(synchronize_session=False)
+        GroupMembership.query.filter_by(group_id=group.id).delete(synchronize_session=False)
+        db.session.delete(group)
+
+    AuditLog.query.filter(
+        (AuditLog.actor_id == user.id) | (AuditLog.target_user_id == user.id)
+    ).delete(synchronize_session=False)
+    Notification.query.filter_by(user_id=user.id).delete(synchronize_session=False)
+    NotificationPreference.query.filter_by(user_id=user.id).delete(synchronize_session=False)
+    UserPermission.query.filter_by(user_id=user.id).delete(synchronize_session=False)
+    ScheduledTransfer.query.filter(
+        (ScheduledTransfer.sender_id == user.id) | (ScheduledTransfer.receiver_id == user.id)
+    ).delete(synchronize_session=False)
+    Beneficiary.query.filter(
+        (Beneficiary.owner_id == user.id) | (Beneficiary.beneficiary_id == user.id)
+    ).delete(synchronize_session=False)
+    SupportMessage.query.filter_by(author_id=user.id).delete(synchronize_session=False)
+
+    ticket_ids = [t.id for t in SupportTicket.query.filter_by(user_id=user.id).all()]
+    if ticket_ids:
+        SupportMessage.query.filter(SupportMessage.ticket_id.in_(ticket_ids)).delete(synchronize_session=False)
+    SupportTicket.query.filter_by(user_id=user.id).delete(synchronize_session=False)
+
+    bill_ids = [b.id for b in BillPayment.query.filter_by(user_id=user.id).all()]
+    if bill_ids:
+        BillPaymentLedgerEntry.query.filter(BillPaymentLedgerEntry.bill_payment_id.in_(bill_ids)).delete(synchronize_session=False)
+    BillPayment.query.filter_by(user_id=user.id).delete(synchronize_session=False)
+    BillPaymentLedgerEntry.query.filter_by(account_id=user.id).delete(synchronize_session=False)
+    UserRole.query.filter_by(user_id=user.id).delete(synchronize_session=False)
+    UserProfile.query.filter_by(user_id=user.id).delete(synchronize_session=False)
+
+    db.session.delete(user)
+    db.session.commit()
+    flash(f"{username} has been deleted.", "success")
+    return redirect(url_for("admin.admin_panel"))
+
+
+# ---------------- Privileged transfers ----------------
+
+@bp.route("/admin/transfer", methods=["POST"])
+@bp.route("/admin/privileged-transfer", methods=["POST"])
+@permission_required("privileged_transfer")
+def admin_transfer():
+    if request.path == "/admin/privileged-transfer":
+        if not request.form.get("reason", "").strip():
+            flash("A transfer reason is required.", "error")
+            return redirect(url_for("admin.admin_panel"))
+        return request_privileged_transfer()
+
+    source_username = (request.form.get("source_username") or request.form.get("from_username") or "").strip()
+    receiver_username = (request.form.get("receiver_username") or request.form.get("to_username") or "").strip()
+    reason = request.form.get("reason", "").strip()
+
+    source = User.query.filter_by(username=source_username).first()
+    receiver = User.query.filter_by(username=receiver_username).first()
+
+    if not source or not source.is_enabled or not receiver or not receiver.is_enabled:
+        flash("Both source and recipient must be enabled accounts.", "error")
+        return redirect(url_for("admin.admin_panel"))
+    if source.id == receiver.id:
+        flash("Source and recipient must be different accounts.", "error")
+        return redirect(url_for("admin.admin_panel"))
+    if not reason:
+        flash("A transfer reason is required.", "error")
+        return redirect(url_for("admin.admin_panel"))
+
+    try:
+        amount = Decimal(request.form.get("amount", "")).quantize(Decimal("0.01"))
+    except (InvalidOperation, ValueError, TypeError):
+        flash("Enter a valid amount.", "error")
+        return redirect(url_for("admin.admin_panel"))
+
+    if amount <= 0:
+        flash("Amount must be greater than zero.", "error")
+        return redirect(url_for("admin.admin_panel"))
+
+    source_balance = Decimal(source.balance)
+    if amount > source_balance:
+        flash("Insufficient checking balance in the source account.", "error")
+        return redirect(url_for("admin.admin_panel"))
+
+    duplicate = Transaction.query.filter(
+        Transaction.sender_id == source.id,
+        Transaction.receiver_id == receiver.id,
+        Transaction.amount == amount,
+        Transaction.created_at >= datetime.now(timezone.utc) - timedelta(seconds=60),
+        Transaction.status == "completed",
+    ).first()
+    if duplicate:
+        flash("A matching privileged transfer was submitted recently.", "error")
+        return redirect(url_for("admin.admin_panel"))
+
+    source.balance = source_balance - amount
+    receiver.balance = Decimal(receiver.balance) + amount
+
+    transaction = Transaction(
+        sender_id=source.id,
+        receiver_id=receiver.id,
+        amount=amount,
+        note=f"Privileged transfer: {reason[:180]}",
+    )
+    db.session.add(transaction)
+    db.session.flush()
+    add_ledger_entries(transaction)
+    create_notification(
+        receiver.id,
+        "Privileged funds received",
+        f"A management transfer credited {money(amount)} to your account.",
+    )
+    record_audit(
+        "privileged_transfer",
+        receiver.id,
+        f"source={source.username}; amount={amount}; reason={reason[:180]}",
+    )
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        flash("The privileged transfer could not be completed.", "error")
+        return redirect(url_for("admin.admin_panel"))
+
+    send_live_update(source.id, "balance_changed", checking_balance=str(source.balance))
+    send_live_update(receiver.id, "money_received", transaction_id=transaction.id)
+    flash("Privileged transfer completed and recorded.", "success")
+    return redirect(url_for("admin.admin_panel"))
+
+
+@bp.route("/admin/privileged-transfer/request", methods=["POST"])
+@permission_required("privileged_transfer")
+def request_privileged_transfer():
+    source = User.query.filter_by(
+        username=(request.form.get("source_username") or request.form.get("from_username") or "").strip()
+    ).first()
+    receiver = User.query.filter_by(
+        username=(request.form.get("receiver_username") or request.form.get("to_username") or "").strip()
+    ).first()
+    reason = request.form.get("reason", "").strip()[:200]
+
+    try:
+        amount = Decimal(request.form.get("amount", "")).quantize(Decimal("0.01"))
+    except (InvalidOperation, ValueError, TypeError):
+        amount = Decimal("0.00")
+
+    if (not source or not receiver or not source.is_enabled or not receiver.is_enabled
+            or source.id == receiver.id or amount <= 0 or not reason):
+        flash("Enabled, different accounts, a positive amount, and a reason are required.", "error")
+        return redirect(url_for("admin.admin_panel"))
+
+    duplicate = Transaction.query.filter(
+        Transaction.sender_id == source.id,
+        Transaction.receiver_id == receiver.id,
+        Transaction.amount == amount,
+        Transaction.created_at >= datetime.now(timezone.utc) - timedelta(seconds=60),
+        Transaction.status == "completed",
+    ).first()
+    pending_duplicate = PrivilegedTransferRequest.query.filter(
+        PrivilegedTransferRequest.actor_id == current_user.id,
+        PrivilegedTransferRequest.source_id == source.id,
+        PrivilegedTransferRequest.receiver_id == receiver.id,
+        PrivilegedTransferRequest.amount == amount,
+        PrivilegedTransferRequest.status == "pending",
+    ).first()
+
+    if duplicate or pending_duplicate:
+        flash("A matching privileged transfer is already recent or pending.", "error")
+        return redirect(url_for("admin.admin_panel"))
+
+    request_record = PrivilegedTransferRequest(
+        actor_id=current_user.id,
+        source_id=source.id,
+        receiver_id=receiver.id,
+        amount=amount,
+        reason=reason,
+    )
+    db.session.add(request_record)
+    db.session.flush()
+    record_audit(
+        "privileged_transfer_requested",
+        receiver.id,
+        f"request={request_record.id}; source={source.username}; reason={reason}",
+    )
+    db.session.commit()
+
+    create_notification(
+        current_user.id,
+        "Transfer awaiting approval",
+        f"Privileged transfer request #{request_record.id} is pending.",
+    )
+    db.session.commit()
+    flash("Privileged transfer submitted for approval.", "success")
+    return redirect(url_for("admin.admin_panel"))
+
+
+def _approve_privileged_transfer(request_record):
+    source = db.session.get(User, request_record.source_id)
+    receiver = db.session.get(User, request_record.receiver_id)
+
+    if (request_record.status != "pending" or not source or not receiver
+            or not source.is_enabled or not receiver.is_enabled
+            or request_record.amount > Decimal(source.balance)):
+        return False
+
+    duplicate = Transaction.query.filter(
+        Transaction.sender_id == source.id,
+        Transaction.receiver_id == receiver.id,
+        Transaction.amount == request_record.amount,
+        Transaction.created_at >= datetime.now(timezone.utc) - timedelta(seconds=60),
+        Transaction.status == "completed",
+    ).first()
+    if duplicate:
+        return False
+
+    source.balance = Decimal(source.balance) - request_record.amount
+    receiver.balance = Decimal(receiver.balance) + request_record.amount
+
+    transaction = Transaction(
+        sender_id=source.id,
+        receiver_id=receiver.id,
+        amount=request_record.amount,
+        note=f"Approved privileged transfer: {request_record.reason[:160]}",
+    )
+    db.session.add(transaction)
+    db.session.flush()
+    add_ledger_entries(transaction)
+
+    request_record.status = "approved"
+    request_record.approved_by_id = current_user.id
+    request_record.transaction_id = transaction.id
+    request_record.decided_at = datetime.now(timezone.utc)
+
+    record_audit(
+        "privileged_transfer_approved",
+        receiver.id,
+        f"request={request_record.id}; reason={request_record.reason}",
+    )
+    create_notification(
+        receiver.id,
+        "Approved funds received",
+        f"An approved management transfer credited {money(request_record.amount)}.",
+    )
+    return True
+
+
+@bp.route("/admin/privileged-transfer/<int:request_id>/approve", methods=["POST"])
+@permission_required("approve_transfer")
+def approve_privileged_transfer_route(request_id):
+    request_record = db.session.get(PrivilegedTransferRequest, request_id)
+    if not request_record:
+        abort(404)
+    if not _approve_privileged_transfer(request_record):
+        db.session.rollback()
+        flash("That request is no longer valid or the source lacks funds.", "error")
+        return redirect(url_for("admin.admin_panel"))
+    db.session.commit()
+    flash("Privileged transfer approved.", "success")
+    return redirect(url_for("admin.admin_panel"))
+
+
+@bp.route("/admin/privileged-transfer/<int:request_id>/reject", methods=["POST"])
+@permission_required("approve_transfer")
+def reject_privileged_transfer(request_id):
+    request_record = db.session.get(PrivilegedTransferRequest, request_id)
+    if not request_record:
+        abort(404)
+    if request_record.status != "pending":
+        flash("That request has already been decided.", "error")
+        return redirect(url_for("admin.admin_panel"))
+
+    request_record.status = "rejected"
+    request_record.approved_by_id = current_user.id
+    request_record.decided_at = datetime.now(timezone.utc)
+    record_audit("privileged_transfer_rejected", request_record.receiver_id, f"request={request_id}")
+    db.session.commit()
+    flash("Privileged transfer rejected.", "success")
+    return redirect(url_for("admin.admin_panel"))
+
+
+@bp.route("/admin/check-deposit", methods=["POST"])
+@permission_required("check_deposit")
+def deposit_demo_check():
+    source = User.query.filter_by(
+        username=(request.form.get("source_username") or request.form.get("from_username") or "").strip()
+    ).first()
+    recipient = User.query.filter_by(
+        username=(request.form.get("recipient_username") or request.form.get("to_username") or "").strip()
+    ).first()
+    check_number = request.form.get("check_number", "").strip()[:80]
+    reference = request.form.get("reference", "").strip()[:200]
+
+    try:
+        amount = Decimal(request.form.get("amount", "")).quantize(Decimal("0.01"))
+    except (InvalidOperation, ValueError, TypeError):
+        amount = Decimal("0.00")
+
+    if (not source or not recipient or not source.is_enabled or not recipient.is_enabled
+            or source.id == recipient.id or amount <= 0 or not check_number or not reference):
+        flash("Enabled, different accounts, a positive amount, check number, and reference are required.", "error")
+        return redirect(url_for("admin.admin_panel"))
+
+    if Decimal(source.balance) < amount:
+        flash("The check writer has insufficient checking funds.", "error")
+        return redirect(url_for("admin.admin_panel"))
+
+    if CheckDeposit.query.filter_by(source_id=source.id, check_number=check_number).first():
+        flash("That check number has already been deposited for this account.", "error")
+        return redirect(url_for("admin.admin_panel"))
+
+    source.balance = Decimal(source.balance) - amount
+    recipient.balance = Decimal(recipient.balance) + amount
+
+    transaction = Transaction(
+        sender_id=source.id,
+        receiver_id=recipient.id,
+        amount=amount,
+        note=f"Demo check {check_number}: {reference}"[:200],
+        cancellable_until=datetime.now(timezone.utc),
+    )
+    db.session.add(transaction)
+    db.session.flush()
+    add_ledger_entries(transaction)
+
+    deposit = CheckDeposit(
+        actor_id=current_user.id,
+        source_id=source.id,
+        recipient_id=recipient.id,
+        transaction_id=transaction.id,
+        amount=amount,
+        check_number=check_number,
+        reference=reference,
+    )
+    db.session.add(deposit)
+    create_notification(
+        recipient.id,
+        "Demo check deposited",
+        f"{money(amount)} from @{source.username} was credited to your checking account.",
+    )
+    record_audit(
+        "demo_check_deposited",
+        recipient.id,
+        f"source={source.username}; amount={amount}; check={check_number}; reference={reference}",
+    )
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        flash("The demo check could not be posted.", "error")
+        return redirect(url_for("admin.admin_panel"))
+
+    send_live_update(recipient.id, "money_received", transaction_id=transaction.id, source="demo_check")
+    flash("Demo check posted and credited atomically.", "success")
+    return redirect(url_for("admin.admin_panel"))
