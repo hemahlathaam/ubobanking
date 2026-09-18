@@ -1,26 +1,36 @@
 {% extends "base.html" %}
+{% from "_logo.html" import org_logo, org_pill %}
+
+{% block title %}Log in — {{ org.name }}{% endblock %}
 
 {% block public_content %}
 
 <div class="login-container">
     <div class="login-card">
-        <!-- RUBO Branding -->
+
         <div class="login-header">
-            <div class="rubo-logo">
-                <span class="rubo-icon">⚡</span>
+            <div class="login-logo">
+                {{ org_logo(org, size=88) }}
             </div>
-            <h1 class="rubo-title">RUBO</h1>
-            <p class="rubo-subtitle">Republic of United Boys Organization</p>
-            <p class="rubo-tagline">Smart Banking for the Modern Era</p>
+            <h1 class="login-title">{{ org.name }}</h1>
+            <p class="login-subtitle">{{ org.full_name }}</p>
+            <p class="login-tagline">{{ org.tagline }}</p>
         </div>
 
-        <!-- Login Form -->
+        <div class="org-switcher login-switcher">
+            {% for o in all_orgs %}
+                {{ org_pill(o, org.slug) }}
+            {% endfor %}
+        </div>
+
         <form method="post" class="login-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
             <div class="form-group">
                 <label for="username" class="form-label">Username</label>
-                <input 
+                <input
                     id="username"
-                    name="username" 
+                    name="username"
                     type="text"
                     class="form-input"
                     placeholder="Enter your username"
@@ -31,9 +41,9 @@
 
             <div class="form-group">
                 <label for="password" class="form-label">Password</label>
-                <input 
+                <input
                     id="password"
-                    name="password" 
+                    name="password"
                     type="password"
                     class="form-input"
                     placeholder="Enter your password"
@@ -43,241 +53,16 @@
             </div>
 
             <button type="submit" class="login-button">
-                Sign In to RUBO
+                Sign in to {{ org.name }}
             </button>
         </form>
 
-        <!-- Footer Info -->
         <div class="login-footer">
-            <p class="demo-notice">
-                🔒 Secure Demo Environment · No Real Transactions
-            </p>
-            <p class="copyright-text">
-                RUBO Banking Platform
-            </p>
+            <p class="demo-notice">🔒 Secure Demo Environment · No Real Transactions</p>
+            <p class="copyright-text">{{ partnership_line }}</p>
         </div>
+
     </div>
-
-    <!-- Decorative Background Elements -->
-    <div class="login-bg-decoration"></div>
 </div>
-
-<style>
-.login-container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    position: relative;
-    overflow: hidden;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-}
-
-.login-bg-decoration {
-    position: absolute;
-    width: 200%;
-    height: 200%;
-    top: -50%;
-    left: -50%;
-    background-image: 
-        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
-    animation: float 20s ease-in-out infinite;
-    pointer-events: none;
-}
-
-@keyframes float {
-    0%, 100% { transform: translate(0, 0) rotate(0deg); }
-    50% { transform: translate(30px, -30px) rotate(180deg); }
-}
-
-.login-card {
-    background: white;
-    border-radius: 20px;
-    padding: 60px 50px;
-    width: 100%;
-    max-width: 450px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    position: relative;
-    z-index: 1;
-    animation: slideUp 0.6s ease-out;
-}
-
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.login-header {
-    text-align: center;
-    margin-bottom: 40px;
-}
-
-.rubo-logo {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 40px;
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-    animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4); }
-    50% { transform: scale(1.05); box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6); }
-}
-
-.rubo-title {
-    font-size: 42px;
-    font-weight: 800;
-    color: #333;
-    margin: 0 0 8px 0;
-    letter-spacing: 2px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.rubo-subtitle {
-    font-size: 14px;
-    color: #667eea;
-    font-weight: 600;
-    margin: 0 0 10px 0;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-}
-
-.rubo-tagline {
-    font-size: 13px;
-    color: #999;
-    margin: 0;
-    font-style: italic;
-}
-
-.login-form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.form-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.form-input {
-    padding: 12px 16px;
-    border: 2px solid #e0e0e0;
-    border-radius: 10px;
-    font-size: 14px;
-    transition: all 0.3s ease;
-    font-family: inherit;
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    background-color: #f8f9ff;
-}
-
-.form-input::placeholder {
-    color: #bbb;
-}
-
-.login-button {
-    padding: 14px 24px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-top: 10px;
-    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
-}
-
-.login-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
-}
-
-.login-button:active {
-    transform: translateY(0);
-}
-
-.login-footer {
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 1px solid #f0f0f0;
-    text-align: center;
-}
-
-.demo-notice {
-    font-size: 12px;
-    color: #667eea;
-    margin: 0 0 10px 0;
-    font-weight: 600;
-}
-
-.copyright-text {
-    font-size: 11px;
-    color: #ccc;
-    margin: 0;
-}
-
-/* Responsive Design */
-@media (max-width: 600px) {
-    .login-container {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 20px;
-    }
-
-    .login-card {
-        padding: 40px 30px;
-        border-radius: 15px;
-    }
-
-    .rubo-title {
-        font-size: 36px;
-    }
-
-    .login-header {
-        margin-bottom: 30px;
-    }
-
-    .rubo-logo {
-        width: 70px;
-        height: 70px;
-        font-size: 36px;
-    }
-}
-</style>
 
 {% endblock %}
