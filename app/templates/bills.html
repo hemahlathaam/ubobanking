@@ -1,9 +1,90 @@
 {% extends "base.html" %}
-{% block title %}Bill pay | MiniBank{% endblock %}
+
+{% block title %}Bill pay — {{ org.name }}{% endblock %}
+
 {% block content %}
+
+<div class="page-heading">
+    <div>
+        <p class="page-label">BILL PAY</p>
+        <h1>Demo bill payment</h1>
+        <p>Pay a demo biller from your checking balance.</p>
+    </div>
+</div>
+
 <section class="professional-panel">
-    <h1>Demo bill payment</h1>
-    <form method="post" class="professional-form"><input name="payee" placeholder="Payee" required><input name="amount" type="number" min="0.01" step="0.01" required><input name="reference" placeholder="Reference"><button class="button" type="submit">Pay bill</button></form>
-    {% for payment in payments %}<div class="row"><span>{{ payment.created_at|sgt }} · {{ payment.payee }} · {{ payment.reference }}</span><strong>{{ payment.amount|money }}</strong></div>{% else %}<p>No bill payments.</p>{% endfor %}
+
+    <div class="panel-header">
+        <div>
+            <h2>New payment</h2>
+            <p>All amounts come out of your demo checking balance.</p>
+        </div>
+    </div>
+
+    <form method="post" class="professional-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group">
+            <label for="payee">Payee</label>
+            <input id="payee" name="payee" maxlength="120" placeholder="Payee" required>
+        </div>
+
+        <div class="form-group">
+            <label for="amount">Amount</label>
+            <div class="input-prefix-wrapper">
+                <span>$</span>
+                <input id="amount" name="amount" type="number" min="0.01" step="0.01"
+                       placeholder="0.00" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="reference">Reference (optional)</label>
+            <input id="reference" name="reference" maxlength="120" placeholder="Reference">
+        </div>
+
+        <button class="primary-bank-button" type="submit">Pay bill</button>
+    </form>
+
 </section>
+
+<section class="professional-panel">
+
+    <div class="panel-header">
+        <div>
+            <h2>Payment history</h2>
+            <p>{{ payments|length }} payment(s).</p>
+        </div>
+    </div>
+
+    {% if payments %}
+        <div class="transaction-list">
+            {% for payment in payments %}
+            <div class="professional-transaction">
+                <div class="transaction-main">
+                    <div class="transaction-direction sent-icon">↗</div>
+                    <div>
+                        <strong>{{ payment.payee }}</strong>
+                        <p>{{ payment.created_at|sgt }}</p>
+                        {% if payment.reference %}
+                            <small>{{ payment.reference }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="transaction-amount amount-sent">
+                    -{{ payment.amount|money }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="professional-empty">
+            <div class="empty-icon">$</div>
+            <h3>No bill payments</h3>
+            <p>Your demo bill payments will appear here.</p>
+        </div>
+    {% endif %}
+
+</section>
+
 {% endblock %}
