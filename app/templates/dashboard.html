@@ -1,162 +1,77 @@
 {% extends "base.html" %}
 
-{% block title %}
-Dashboard | RUBO
-{% endblock %}
-
+{% block title %}Dashboard — {{ org.name }}{% endblock %}
 
 {% block content %}
 
 <div class="page-heading">
-
     <div>
-        <p class="page-label">
-            OVERVIEW
-        </p>
-
-        <h1>
-            Welcome to RUBO, {{ current_user.display_name }}
-        </h1>
-
-        <p>
-            Here's an overview of your RUBO account and recent activity.
-        </p>
+        <p class="page-label">OVERVIEW</p>
+        <h1>Welcome to {{ org.name }}, {{ current_user.display_name }}</h1>
+        <p>Here's an overview of your {{ org.name }} account and recent activity.</p>
     </div>
-
 </div>
 
-
 <section class="account-balance-card">
-
     <div class="balance-card-top">
-
         <div>
-            <span class="balance-label">
-                AVAILABLE BALANCE
-            </span>
-
-            <h2>
-                {{ current_user.balance|money }}
-            </h2>
+            <span class="balance-label">AVAILABLE BALANCE</span>
+            <h2>{{ current_user.balance|money }}</h2>
         </div>
-
-        <div class="account-status">
-            ACTIVE
-        </div>
-
+        <div class="account-status">ACTIVE</div>
     </div>
-
 
     <div class="balance-card-bottom">
-
         <div>
             <span>ACCOUNT HOLDER</span>
-
-            <strong>
-                {{ current_user.display_name }}
-            </strong>
+            <strong>{{ current_user.display_name }}</strong>
         </div>
-
         <div>
             <span>USERNAME</span>
-
-            <strong>
-                @{{ current_user.username }}
-            </strong>
+            <strong>@{{ current_user.username }}</strong>
         </div>
-
         <div>
-            <span>ACCOUNT TYPE</span>
-
-            <strong>
-                RUBO Banking
-            </strong>
+            <span>ORGANIZATION</span>
+            <strong>{{ org.full_name }}</strong>
         </div>
-
     </div>
-
 </section>
-
 
 <section class="dashboard-grid">
 
-    <a
-        href="{{ url_for('transfer') }}"
-        class="professional-action-card"
-    >
-
-        <div class="professional-action-icon">
-            ↗
-        </div>
-
+    <a href="{{ url_for('transfers.transfer') }}" class="professional-action-card">
+        <div class="professional-action-icon">↗</div>
         <div>
             <h3>Transfer funds</h3>
-
-            <p>
-                Send money to another RUBO account.
-            </p>
+            <p>Send money to another {{ org.name }} account.</p>
         </div>
-
-        <span class="action-arrow">
-            →
-        </span>
-
+        <span class="action-arrow">→</span>
     </a>
 
-
-    <a
-        href="{{ url_for('transactions') }}"
-        class="professional-action-card"
-    >
-
-        <div class="professional-action-icon">
-            ☷
-        </div>
-
+    <a href="{{ url_for('dashboard.transactions') }}" class="professional-action-card">
+        <div class="professional-action-icon">☷</div>
         <div>
             <h3>Transaction history</h3>
-
-            <p>
-                Review sent and received transactions.
-            </p>
+            <p>Review sent and received transactions.</p>
         </div>
-
-        <span class="action-arrow">
-            →
-        </span>
-
+        <span class="action-arrow">→</span>
     </a>
 
 </section>
-
 
 <section class="professional-panel">
 
     <div class="panel-header">
-
         <div>
-            <h2>
-                Recent transactions
-            </h2>
-
-            <p>
-                Your latest RUBO account activity.
-            </p>
+            <h2>Recent transactions</h2>
+            <p>Your latest {{ org.name }} account activity.</p>
         </div>
-
-        <a href="{{ url_for('transactions') }}">
-            View all
-        </a>
-
+        <a href="{{ url_for('dashboard.transactions') }}">View all</a>
     </div>
 
-
     {% if transactions %}
-
         <div class="transaction-list">
-
             {% for transaction in transactions %}
-
             <div class="professional-transaction">
 
                 <div class="transaction-main">
@@ -169,60 +84,29 @@ Dashboard | RUBO
                             received-icon
                         {% endif %}
                     ">
-
-                        {% if transaction.sender_id == current_user.id %}
-                            ↗
-                        {% else %}
-                            ↙
-                        {% endif %}
-
+                        {% if transaction.sender_id == current_user.id %}↗{% else %}↙{% endif %}
                     </div>
 
-
                     <div>
-
                         {% if transaction.sender_id == current_user.id %}
-
-                            <strong>
-                                Transfer to
-                                {{ transaction.receiver.display_name }}
-                            </strong>
-
-                            <p>
-                                @{{ transaction.receiver.username }}
-                            </p>
-
+                            <strong>Transfer to {{ transaction.receiver.display_name }}</strong>
+                            <p>@{{ transaction.receiver.username }}</p>
                         {% else %}
-
-                            <strong>
-                                Transfer from
-                                {{ transaction.sender.display_name }}
-                            </strong>
-
-                            <p>
-                                @{{ transaction.sender.username }}
-                            </p>
-
+                            <strong>Transfer from {{ transaction.sender.display_name }}</strong>
+                            <p>@{{ transaction.sender.username }}</p>
                         {% endif %}
 
-
                         {% if transaction.note %}
-
-                        <small>
-                            {{ transaction.note }}
-                        </small>
-
+                            <small>{{ transaction.note }}</small>
                         {% endif %}
 
                         <small class="transaction-reference">
                             Reference: TXN-{{ "%08d"|format(transaction.id) }}
                             · {{ transaction.created_at|sgt }}
                         </small>
-
                     </div>
 
                 </div>
-
 
                 <div class="
                     transaction-amount
@@ -232,38 +116,22 @@ Dashboard | RUBO
                         amount-received
                     {% endif %}
                 ">
-
                     {% if transaction.sender_id == current_user.id %}
                         -{{ transaction.amount|money }}
                     {% else %}
                         +{{ transaction.amount|money }}
                     {% endif %}
-
                 </div>
 
             </div>
-
             {% endfor %}
-
         </div>
-
-
     {% else %}
-
         <div class="professional-empty">
-
-            <div class="empty-icon">
-                ☷
-            </div>
-
+            <div class="empty-icon">☷</div>
             <h3>No transactions yet</h3>
-
-            <p>
-                Your RUBO account activity will appear here.
-            </p>
-
+            <p>Your {{ org.name }} account activity will appear here.</p>
         </div>
-
     {% endif %}
 
 </section>
