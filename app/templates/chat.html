@@ -1,141 +1,91 @@
 {% extends "base.html" %}
 
 {% block title %}
-{% if group %}{{ group.name }}{% else %}Chat with {{ other_user.display_name }}{% endif %} | MiniBank
+{% if group %}{{ group.name }}{% else %}Chat with {{ other_user.display_name }}{% endif %} — {{ org.name }}
 {% endblock %}
 
 {% block content %}
 
 <div class="page-heading">
-
     <div>
-        <p class="page-label">
-            {% if group %}GROUP CHAT{% else %}PRIVATE MESSAGE{% endif %}
-        </p>
-
-        <h1>
-            {% if group %}{{ group.name }}{% else %}{{ other_user.display_name }}{% endif %}
-        </h1>
-
-        <p>
-            {% if group %}Owned by @{{ group.creator.username }}{% else %}@{{ other_user.username }}{% endif %}
-        </p>
+        <p class="page-label">{% if group %}GROUP CHAT{% else %}PRIVATE MESSAGE{% endif %}</p>
+        <h1>{% if group %}{{ group.name }}{% else %}{{ other_user.display_name }}{% endif %}</h1>
+        <p>{% if group %}Owned by @{{ group.creator.username }}{% else %}@{{ other_user.username }}{% endif %}</p>
     </div>
-
 </div>
 
 <section class="professional-panel chat-panel">
 
     <div class="chat-header">
-
         <div class="message-avatar">
             {% if group %}#{% else %}{{ other_user.display_name[0]|upper }}{% endif %}
         </div>
-
         <div>
             <strong>{% if group %}{{ group.name }}{% else %}{{ other_user.display_name }}{% endif %}</strong>
-
             <span>
                 {% if group %}{{ members|length }} member(s){% else %}@{{ other_user.username }}{% endif %}
             </span>
         </div>
-
     </div>
 
     <div class="chat-messages">
 
         {% if conversation %}
-
             {% for message in conversation %}
-
             <div class="
                 chat-message-row
-                {% if message.sender_id == current_user.id %}
-                    my-message-row
-                {% else %}
-                    other-message-row
-                {% endif %}
+                {% if message.sender_id == current_user.id %}my-message-row{% else %}other-message-row{% endif %}
             ">
-
                 <div class="
                     chat-bubble
-                    {% if message.sender_id == current_user.id %}
-                        my-message
-                    {% else %}
-                        other-message
-                    {% endif %}
+                    {% if message.sender_id == current_user.id %}my-message{% else %}other-message{% endif %}
                 ">
-
                     {% if group %}<strong>@{{ message.sender.username }}</strong>{% endif %}
                     <p>{{ message.content }}</p>
+
                     {% if attachments.get(message.id) %}
-                    {% for attachment in attachments.get(message.id) %}
-                    <a href="{{ attachment.url }}" rel="noreferrer">{{ attachment.filename }}</a>
-                    {% endfor %}
+                        {% for attachment in attachments.get(message.id) %}
+                        <a href="{{ attachment.url }}" rel="noreferrer">{{ attachment.filename }}</a>
+                        {% endfor %}
                     {% endif %}
 
-                    <span>
-                        {{ message.created_at|sgt }}
-                    </span>
+                    <span>{{ message.created_at|sgt }}</span>
+
                     {% if reactions.get(message.id) %}
                     <small>Reactions: {{ reactions.get(message.id)|join(" ") }}</small>
                     {% endif %}
+
                     {% if receipt_counts.get(message.id, 0) %}
                     <small>
                         {% if group %}Read by {{ receipt_counts.get(message.id) }} member(s)
                         {% elif message.sender_id == current_user.id %}Seen{% endif %}
                     </small>
                     {% endif %}
-
                 </div>
+
                 <form method="post"
-                      action="{% if group %}{{ url_for('react_to_group_message', message_id=message.id) }}{% else %}{{ url_for('react_to_message', message_id=message.id) }}{% endif %}">
+                      action="{% if group %}{{ url_for('chat.react_to_group_message', message_id=message.id) }}{% else %}{{ url_for('chat.react_to_message', message_id=message.id) }}{% endif %}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" name="emoji" value="👍">👍</button>
                     <button type="submit" name="emoji" value="❤️">❤️</button>
                 </form>
-
             </div>
-
             {% endfor %}
-
         {% else %}
-
             <div class="chat-empty">
-
                 <h3>No messages yet</h3>
-
-                <p>
-                    Send the first message.
-                </p>
-
+                <p>Send the first message.</p>
             </div>
-
         {% endif %}
 
     </div>
 
-    <form
-        method="post"
-        class="chat-form"
-    >
-
-        <textarea
-            name="content"
-            maxlength="1000"
-            placeholder="Write a message..."
-            rows="2"
-            required
-        ></textarea>
+    <form method="post" class="chat-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <textarea name="content" maxlength="1000" placeholder="Write a message..." rows="2" required></textarea>
         <input name="attachment_url" type="url" placeholder="Attachment URL (optional)">
         <input name="attachment_name" maxlength="160" placeholder="Attachment name">
-
-        <button
-            type="submit"
-            class="chat-send-button"
-        >
-            Send
-        </button>
-
+        <button type="submit" class="chat-send-button">Send</button>
     </form>
 
 </section>
@@ -143,28 +93,38 @@
 {% if group %}
 <section class="professional-panel">
     <h2>Members</h2>
+
     {% for membership in members %}
     <div class="row">
         <span>@{{ membership.user.username }} ({{ membership.role }})</span>
+
         {% if is_owner and membership.user_id != group.creator_id %}
-        <form method="post" action="{{ url_for('manage_group_members', group_id=group.id) }}">
+        <form method="post" action="{{ url_for('chat.manage_group_members', group_id=group.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="action" value="remove">
             <input type="hidden" name="username" value="{{ membership.user.username }}">
-            <button type="submit">Remove</button>
+            <button type="submit" class="danger-button">Remove</button>
         </form>
-        <form method="post" action="{{ url_for('manage_group_members', group_id=group.id) }}">
-            <input type="hidden" name="action" value="{% if membership.role == 'moderator' %}demote{% else %}promote{% endif %}">
+
+        <form method="post" action="{{ url_for('chat.manage_group_members', group_id=group.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action"
+                   value="{% if membership.role == 'moderator' %}demote{% else %}promote{% endif %}">
             <input type="hidden" name="username" value="{{ membership.user.username }}">
-            <button type="submit">{% if membership.role == 'moderator' %}Demote{% else %}Make moderator{% endif %}</button>
+            <button type="submit">
+                {% if membership.role == 'moderator' %}Demote{% else %}Make moderator{% endif %}
+            </button>
         </form>
         {% endif %}
     </div>
     {% endfor %}
+
     {% if is_owner %}
-    <form method="post" action="{{ url_for('manage_group_members', group_id=group.id) }}" class="chat-form">
+    <form method="post" action="{{ url_for('chat.manage_group_members', group_id=group.id) }}" class="chat-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input name="username" placeholder="Username to add" required>
         <input type="hidden" name="action" value="add">
-        <button type="submit">Add member</button>
+        <button type="submit" class="primary-bank-button">Add member</button>
     </form>
     {% endif %}
 </section>
