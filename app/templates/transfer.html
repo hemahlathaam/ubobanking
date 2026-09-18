@@ -1,54 +1,37 @@
 {% extends "base.html" %}
 
-{% block title %}
-Transfer | MiniBank
-{% endblock %}
+{% block title %}Transfer — {{ org.name }}{% endblock %}
 
 {% block content %}
 
 <div class="page-heading">
-
     <div>
-        <p class="page-label">
-            TRANSFER
-        </p>
-
-        <h1>
-            Transfer demo funds
-        </h1>
-
-        <p>
-            Send demo money to another MiniBank account.
-        </p>
+        <p class="page-label">TRANSFER</p>
+        <h1>Transfer demo funds</h1>
+        <p>Send demo money to another {{ org.name }} account.</p>
     </div>
-
 </div>
-
 
 <div class="transfer-layout">
 
     <section class="professional-panel transfer-panel">
 
         <div class="panel-header">
-
             <div>
                 <h2>New transfer</h2>
-
+                <p>Enter the recipient and transfer amount.</p>
                 <p>
-                    Enter the recipient and transfer amount.
+                    <a href="{{ url_for('transfers.beneficiaries') }}">Manage beneficiaries</a> ·
+                    <a href="{{ url_for('transfers.scheduled_transfers') }}">Schedule a transfer</a>
                 </p>
-                <p><a href="{{ url_for('beneficiaries') }}">Manage beneficiaries</a> · <a href="{{ url_for('scheduled_transfers') }}">Schedule a transfer</a></p>
             </div>
-
         </div>
 
-
         <form method="post" class="professional-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
             <div class="form-group">
-                <label for="beneficiary_id">
-                    Saved beneficiary (optional)
-                </label>
+                <label for="beneficiary_id">Saved beneficiary (optional)</label>
                 <select id="beneficiary_id" name="beneficiary_id">
                     <option value="">Choose a saved beneficiary</option>
                     {% for item in beneficiaries %}
@@ -60,103 +43,40 @@ Transfer | MiniBank
             </div>
 
             <div class="form-group">
-
-                <label for="receiver_username">
-                    Recipient username (if no beneficiary is selected)
-                </label>
-
+                <label for="receiver_username">Recipient username (if no beneficiary is selected)</label>
                 <div class="input-prefix-wrapper">
-
                     <span>@</span>
-
-                    <input
-                        id="receiver_username"
-                        name="receiver_username"
-                        placeholder="username"
-                    >
-
+                    <input id="receiver_username" name="receiver_username" placeholder="username">
                 </div>
-
             </div>
 
-
             <div class="form-group">
-
-                <label for="amount">
-                    Amount
-                </label>
-
+                <label for="amount">Amount</label>
                 <div class="input-prefix-wrapper">
-
                     <span>$</span>
-
-                    <input
-                        id="amount"
-                        name="amount"
-                        type="number"
-                        min="0.01"
-                        step="0.01"
-                        placeholder="0.00"
-                        required
-                    >
-
+                    <input id="amount" name="amount" type="number" min="0.01" step="0.01" placeholder="0.00" required>
                 </div>
-
             </div>
-
 
             <div class="form-group">
-
-                <label for="note">
-                    Transfer note
-                </label>
-
-                <input
-                    id="note"
-                    name="note"
-                    maxlength="200"
-                    placeholder="Optional note"
-                >
-
+                <label for="note">Transfer note</label>
+                <input id="note" name="note" maxlength="200" placeholder="Optional note">
             </div>
 
-
-            <button
-                class="primary-bank-button"
-                type="submit"
-            >
-                Transfer funds
-            </button>
-
+            <button class="primary-bank-button" type="submit">Transfer funds</button>
         </form>
 
     </section>
 
-
     <aside class="transfer-summary-card">
-
-        <span class="summary-label">
-            AVAILABLE BALANCE
-        </span>
-
-        <h2>
-            {{ current_user.balance|money }}
-        </h2>
-
+        <span class="summary-label">AVAILABLE BALANCE</span>
+        <h2>{{ current_user.balance|money }}</h2>
         <div class="summary-divider"></div>
-
-        <p>
-            Demo transfers are processed instantly between MiniBank demo accounts.
-        </p>
-
+        <p>Demo transfers are processed instantly between {{ org.name }} demo accounts.</p>
         <div class="demo-security-box">
             DEMO SYSTEM
-
-            <span>
-                No real funds are transferred.
-            </span>
+            <span>No real funds are transferred.</span>
         </div>
-
     </aside>
 
 </div>
