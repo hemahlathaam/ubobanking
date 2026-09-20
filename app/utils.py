@@ -220,7 +220,15 @@ def _current_org():
 
 
 def register_jinja_helpers(app):
+    """
+    Register Jinja filters and the global context processor.
+
+    PERFORMANCE NOTE: inject_globals() runs on every authenticated page
+    render. It used to run ~30 queries for unread badges. Now it runs
+    exactly 4 queries total — one per badge type + the profile lookup.
+    """
     from flask_login import current_user
+    from sqlalchemy import func, or_, and_
 
     app.jinja_env.filters["sgt"] = format_singapore_time
     app.jinja_env.filters["money"] = money
@@ -250,39 +258,65 @@ def register_jinja_helpers(app):
             GroupMessage, GroupReadState, Notification, UserProfile,
         )
 
-        unread = 0
-        senders = db.session.query(Message.sender_id).filter(
-            Message.receiver_id == current_user.id
-        ).distinct().all()
-        for (sid,) in senders:
-            state = MessageReadState.query.filter_by(
-                user_id=current_user.id, other_user_id=sid
-            ).first()
-            q = Message.query.filter(
-                Message.sender_id == sid,
+        # ---- Unread direct messages: ONE query ----
+        unread = (
+            db.session.query(func.count(Message.id))
+            .outerjoin(
+                MessageReadState,
+                and_(
+                    MessageReadState.user_id == current_user.id,
+                    MessageReadState.other_user_id == Message.sender_id,
+                ),
+            )
+            .filter(
                 Message.receiver_id == current_user.id,
+                or_(
+                    MessageReadState.last_read_at.is_(None),
+                    Message.created_at > MessageReadState.last_read_at,
+                ),
             )
-            if state:
-                q = q.filter(Message.created_at > state.last_read_at)
-            unread += q.count()
+            .scalar()
+        ) or 0
 
-        group_unread = 0
-        for m in GroupMembership.query.filter_by(user_id=current_user.id).all():
-            st = GroupReadState.query.filter_by(
-                user_id=current_user.id, group_id=m.group_id
-            ).first()
-            q = GroupMessage.query.filter(
-                GroupMessage.group_id == m.group_id,
+        # ---- Unread group messages: ONE query ----
+        group_unread = (
+            db.session.query(func.count(GroupMessage.id))
+            .outerjoin(
+                GroupMembership,
+                and_(
+                    GroupMembership.group_id == GroupMessage.group_id,
+                    GroupMembership.user_id == current_user.id,
+                ),
+            )
+            .outerjoin(
+                GroupReadState,
+                and_(
+                    GroupReadState.user_id == current_user.id,
+                    GroupReadState.group_id == GroupMessage.group_id,
+                ),
+            )
+            .filter(
+                GroupMembership.user_id == current_user.id,
                 GroupMessage.sender_id != current_user.id,
+                or_(
+                    GroupReadState.last_read_at.is_(None),
+                    GroupMessage.created_at > GroupReadState.last_read_at,
+                ),
             )
-            if st:
-                q = q.filter(GroupMessage.created_at > st.last_read_at)
-            group_unread += q.count()
+            .scalar()
+        ) or 0
 
-        notif_unread = Notification.query.filter_by(
-            user_id=current_user.id, is_read=False
-        ).count()
+        # ---- Unread notifications: ONE query ----
+        notif_unread = (
+            db.session.query(func.count(Notification.id))
+            .filter(
+                Notification.user_id == current_user.id,
+                Notification.is_read.is_(False),
+            )
+            .scalar()
+        ) or 0
 
+        # ---- Profile: ONE query ----
         profile = UserProfile.query.filter_by(user_id=current_user.id).first()
 
         base.update({
