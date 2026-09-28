@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_logo.html" import org_logo, org_pill %}
+{% from "_logo.html" import org_logo %}
 
 {% block title %}Log in — {{ org.name }}{% endblock %}
 
@@ -17,11 +17,7 @@
             <p class="login-tagline">{{ org.tagline }}</p>
         </div>
 
-        <div class="org-switcher login-switcher">
-            {% for o in all_orgs %}
-                {{ org_pill(o, org.slug) }}
-            {% endfor %}
-        </div>
+
 
         <form method="post" class="login-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

@@ -39,10 +39,8 @@ def create_app(config_object=None):
     from .blueprints.chat import bp as chat_bp
     from .blueprints.developer import bp as developer_bp
     from .blueprints.support import bp as support_bp
-    from .blueprints.brand import bp as brand_bp
     from .blueprints.api import bp as api_bp
 
-    app.register_blueprint(brand_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(transfers_bp)

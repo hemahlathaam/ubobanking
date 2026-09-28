@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: rubo-cob-bank
+    name: rubo-bank
     env: python
     plan: free
     buildCommand: |

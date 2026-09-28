@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-{% from "_logo.html" import org_logo, org_pill %}
+{% from "_logo.html" import org_logo %}
 {% from "_role_badges.html" import role_badges %}
 <head>
     <meta charset="utf-8">
@@ -9,17 +9,6 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='dark.css') }}">
-
-    {# Inject org accent colors as CSS variables so theming follows the switcher #}
-    <style>
-        :root {
-            --primary: {{ org.accent }};
-            --primary-dark: {{ org.accent_dark }};
-            --accent-soft: {{ org.accent_soft }};
-            --gold: {{ org.ring }};
-            --gold-soft: {{ org.ring_soft }};
-        }
-    </style>
 </head>
 
 <body class="org-{{ org.slug }}">
@@ -37,15 +26,7 @@
                 <span>{{ org.short_tagline }}</span>
             </div>
         </div>
-
-        {# RUBO ⇄ COB switcher #}
-        <div class="org-switcher">
-            {% for o in all_orgs %}
-                {{ org_pill(o, org.slug) }}
-            {% endfor %}
-        </div>
-
-        <nav class="sidebar-nav">
+<nav class="sidebar-nav">
 
             <a href="{{ url_for('dashboard.dashboard') }}" class="sidebar-link">
                 <span>⌂</span>

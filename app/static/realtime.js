@@ -1,5 +1,5 @@
 /**
- * RUBO × COB — Live update client
+ * RUBO - Live update client
  * Listens for `rubo_update` events from the server and reloads the page
  * when the current route cares about that kind of update.
  */
