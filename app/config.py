@@ -34,9 +34,6 @@ class Config:
     ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin").strip()
     ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
-    DEFAULT_ORG = os.environ.get("DEFAULT_ORG", "rubo").lower()
-    ORG_COOKIE_NAME = "rubo_org"
-    ORG_COOKIE_MAX_AGE = 60 * 60 * 24 * 30
 
     DISPLAY_TIMEZONE = "SGT / Asia/Singapore (UTC+8)"
     SINGAPORE_TZ_NAME = "Asia/Singapore"

@@ -1,5 +1,5 @@
 /**
- * RUBO × COB — Theme toggle
+ * RUBO - Theme toggle
  * Persists the choice in localStorage. Defaults to light.
  */
 

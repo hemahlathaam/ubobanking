@@ -1,4 +1,4 @@
-"""Brand registry for RUBO and COB. Single source of truth for org theming."""
+"""Brand registry for RUBO. Single source of truth for branding."""
 
 ORGS = {
     "rubo": {
@@ -13,30 +13,13 @@ ORGS = {
         "ring": "#e0b13a",
         "ring_soft": "#fff6db",
         "logo_emoji": "⚡",
-        "partner_label": "In collaboration with COB",
-        "partner_slug": "cob",
-    },
-    "cob": {
-        "slug": "cob",
-        "name": "COB",
-        "full_name": "Civilisation of Boys",
-        "tagline": "Civilisation of Boys",
-        "short_tagline": "Civilisation of Boys",
-        "accent": "#7a1f1f",
-        "accent_dark": "#5c1515",
-        "accent_soft": "#fbeaea",
-        "ring": "#d4af37",
-        "ring_soft": "#fff6db",
-        "logo_emoji": "🛡️",
-        "partner_label": "In collaboration with RUBO",
-        "partner_slug": "rubo",
+        "partner_label": "",
+        "partner_slug": "",
     },
 }
 
 DEFAULT_ORG = "rubo"
-PARTNERSHIP_LINE = (
-    "RUBO × COB — Republic of United Boys Organization & Civilisation of Boys"
-)
+PARTNERSHIP_LINE = "Republic of United Boys Organization"
 
 
 def get_org(slug):

@@ -32,14 +32,3 @@
     >{{ org.name }}</text>
 </svg>
 {% endmacro %}
-
-
-{% macro org_pill(org, active_org_slug) %}
-<a
-    href="{{ url_for('brand.switch_org', slug=org.slug) }}"
-    class="org-pill {% if org.slug == active_org_slug %}org-pill-active{% endif %}"
-    style="--pill-accent: {{ org.accent }}; --pill-ring: {{ org.ring }};"
->
-    {{ org.name }}
-</a>
-{% endmacro %}

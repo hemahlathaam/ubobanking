@@ -1,5 +1,5 @@
 /* =========================================================
-   RUBO × COB — Main stylesheet
+   RUBO - Main stylesheet
    ========================================================= */
 
 * { box-sizing: border-box; }
@@ -34,17 +34,6 @@ body {
 
 button, input, select, textarea { font: inherit; }
 a { color: var(--primary); }
-
-/* ---------- Org switcher ---------- */
-
-.org-switcher {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 22px;
-    padding: 4px;
-    background: rgba(255,255,255,0.06);
-    border-radius: 999px;
-}
 
 .org-pill {
     flex: 1;
@@ -1184,7 +1173,7 @@ label { display: block; font-size: 12px; font-weight: 700; margin: 15px 0 7px; }
     .sidebar-link { font-size: 0; justify-content: center; padding: 12px; }
     .sidebar-link span:first-child { font-size: 19px; width: auto; }
     .sidebar-user div:not(.avatar) { display: none; }
-    .logout-button, .theme-toggle, .nav-title, .org-switcher { display: none; }
+    .logout-button, .theme-toggle, .nav-title { display: none; }
 
     .main-area { margin-left: 78px; width: calc(100% - 78px); }
     .dashboard-grid { grid-template-columns: 1fr; }
